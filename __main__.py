@@ -2,16 +2,10 @@
 Main Module
 """
 import _thread
-import time
 
+import LoRa
+import sensor
 
-def second_thread():
-    """
-    Runs on the Second Core
-    """
-    while True:
-        print("Second thread")
-        time.sleep(1)
 
 def main():
     """
@@ -19,13 +13,12 @@ def main():
 
     This will handle the two different threads
     """
+
     print("Hello World!")
 
-    _thread.start_new_thread(second_thread, ())
-
-    while True:
-        print("Main")
-        time.sleep(2)
+    _thread.start_new_thread(sensor.thread, ())
+    LoRa.thread()
+    _thread.exit()
 
 if __name__ == "__main__":
     main()
