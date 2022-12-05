@@ -1,11 +1,12 @@
 """
 Main Module
 """
-import _thread
+import threading
 
 import LoRa
 import sensor
 
+stopflag = False
 
 def main():
     """
@@ -16,9 +17,15 @@ def main():
 
     print("Hello World!")
 
-    _thread.start_new_thread(sensor.thread, ())
-    LoRa.thread()
-    _thread.exit()
+    t1 = LoRa("LoRa")
+    print("LoRa Thread: ")
+    t1.start()
+    sensor.thread()
+
+    print("threads finished...exiting")
+    stopflag = True
+    t1.join()
+    print("Done.")
 
 if __name__ == "__main__":
     main()
