@@ -1,26 +1,25 @@
 """
 Sensor Thread Main
 """
-# import signal
 import time
+import logging
 
-# import LoRa
 
-
-def thread() -> None:
+def run() -> None:
     """
     This thread will handle all communications with the sensors and create new packets
+
+    TODO: Sensor Flowchart
+
     TODO: RTC interface
     TODO: Lightning sensor interface
     TODO: Packet creating
     FIXME: Does GPS go here or with LoRa?
     """
-    # signal.signal(signal.SIGINT, LoRa.shutdown)  # type: ignore
+    logging.info("Sensor")
+    time.sleep(1)
 
-    try:
-        while True:
-            print("Sensor")
-            time.sleep(1)
-    finally:
-        print("Shutting down")
-        return
+if __name__ == "__main__":
+    """
+    Main Block for Sensors - this will only be run if using Sensors individually
+    """
