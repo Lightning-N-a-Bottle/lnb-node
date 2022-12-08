@@ -8,7 +8,7 @@ Main Module
 import signal
 import logging
 import threading
-import multiprocessing as mp
+# import multiprocessing as mp
 import time
 
 import LoRa
