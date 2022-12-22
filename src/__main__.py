@@ -5,17 +5,31 @@ Main Module
     - https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
 
 """
-import signal
 import logging
+import signal
+import sys
+import platform
+if platform.system() == "Linux":
+    if platform.release().find('raspi'):
+        print("THIS IS A RASPBIAN SYSTEM\n")
+    else:
+        print("THIS IS A LINUX SYSTEM\n")
+elif platform.system() == "Windows":
+    print("THIS IS A WINDOWS SYSTEM\n")
+else:
+    print("I DON'T KNOW WHAT SYSTEM THIS IS\n")
 import threading
-# import multiprocessing as mp
-import time
+
+# from loguru import logger
 
 import LoRa
 import sensor
 
+# import multiprocessing as mp
 
-threads = True # Global Variable that kills threads
+
+END = False # Global Variable that kills threads
+PACKET_QUEUE = [] # Sensor thread indicates when a package is ready
 
 def handler(signum, frame) -> None:
     """
@@ -23,18 +37,22 @@ def handler(signum, frame) -> None:
     It relies on the "signal" python library (see documentation below)
     https://docs.python.org/3/library/signal.html
 
+    TODO: Add more handling so that the errors can return more information
+
     signum = number associated with interrupt
     frame = location that the interrupt came from
     signame = reads the name of the interrupt to the user
     """
     signame = signal.Signals(signum).name
-    print(f'Signal handler called with signal {signame} ({signum})')
+    logging.error(f'Signal handler called with signal {signame} ({signum})')
 
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
-        logging.info("Shutting down...")
-        global threads
-        threads = False
+        logging.info("User manually initiated shutdown using \"CTRL+C\"...")
+        global END
+        END = True
+
+    # TODO: Handles a memory access conflict from two threads overlapping
 
 
 def thread1() -> None:
@@ -44,14 +62,18 @@ def thread1() -> None:
     The loop relies on a global variable to determine when the threads should be killed.
     They have to be global because the threads are separate and asynchronous.
     """
-    global threads
-    while threads:
-        LoRa.run()
+
+
+    # global END
+    while not END:
+        # global PACKET_QUEUE
+        if len(PACKET_QUEUE) > 0:
+            LoRa.run(PACKET_QUEUE.pop(0))
     logging.info("Thread 1 finished.")
 
 def thread2() -> None:
     """Second Thread of the program, calls the "run" function of the Sensor Module.
-    
+
     This method is kept simple to reduce the complexity of the main and to make testing modular.
     The loop relies on a global variable to determine when the threads should be killed.
     They have to be global because the threads are separate and asynchronous.
@@ -59,39 +81,47 @@ def thread2() -> None:
     NOTE:   If we run this on the pico, this will have to be run on the main thread instead due to
             only having 2 cores
     """
-    global threads
-    while threads:
-        sensor.run()
+    # global END
+    while not END:
+        PACKET_QUEUE.append(sensor.run())
     logging.info("Thread 2 finished.")
 
-
-if __name__ == "__main__":
+def main():
     """
     Main function - will be run if this file is specified in terminal
 
     This will handle the two different threads
     """
-    # Configuring startup settings
-    format = "%(asctime)s: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,
-                        datefmt="%H:%M:%S")
-    logging.info("Main      : Starting up device...")
-    signal.signal(signal.SIGINT, handler)
+    try:
+        # Configuring startup settings
+        format = "%(asctime)s | main\t\t: %(message)s"
+        logging.basicConfig(format=format, level=logging.INFO,
+                            datefmt="%Y-%m-%D %H:%M:%S")
+        logging.info("Starting up device...")
+        # logger.info("Main      : Starting up device...")
+        signal.signal(signal.SIGINT, handler)
 
-    # Setting up Threads
-    t1 = threading.Thread(target=thread1)
-    t2 = threading.Thread(target=thread2)
-    # t1 = mp.Process(target=thread1)
-    # t2 = mp.Process(target=thread2)
-    t1.start()
-    t2.start()
-    logging.info("Threads Launched...")
+        # Setting up Threads
+        t1 = threading.Thread(target=thread1)
+        t2 = threading.Thread(target=thread2)
+        # t1 = mp.Process(target=thread1)
+        # t2 = mp.Process(target=thread2)
+        t1.start()
+        t2.start()
+        logging.info("Threads Launched...")
 
-    # Safely closing all threads
-    while True:
-        if not threads:
-            break
+        # Safely closing all threads
+        while True:
+            if END:
+                break
 
-    t1.join()
-    t2.join()
-    logging.info("All Threads finished...exiting")
+        t1.join()
+        t2.join()
+        logging.info("All Threads finished...exiting")
+    except ValueError as ve:
+        return str(ve)
+
+if __name__ == "__main__":
+    sys.exit(main())
+    # with logger.catch():
+    #     main()
