@@ -4,10 +4,17 @@ The code that will go into the sensor nodes to record and transmit data
 
 ## Setup Process
 
+The process for setting up the code and flashing it to the device is listed below. Eventually I plan on scripting this process with a bash file so that it is automated.
+
 1. Clone Git Repo on local device
-2. Configure VS Code or Arduino IDE
-3. Install required packages/dependencies
-4. Flash the desired branch to the RPi Pico module
+2. Download and install conda, if not already done
+    1. Windows: https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Windows-x86_64.exe
+    2. Linux/Raspbian: https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-aarch64.sh
+        1. Navigate to the conda directory (`"C:\Users\{Current_User}\miniconda3\Scripts"` on Windows)
+        2. Run `./conda init --verbose`
+        3. Restart all terminals (if vscode, restart the whole IDE)
+3. Create a conda environment from the yml file
+4. Flash the desired branch to the RPi (Pico/Zero) module
 
 ## Functions
 
