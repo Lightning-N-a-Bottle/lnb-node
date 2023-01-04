@@ -6,9 +6,14 @@ Main Module
 
 """
 import logging
+import platform
 import signal
 import sys
-import platform
+import threading
+import time
+
+import src
+
 if platform.system() == "Linux":
     if platform.release().find('raspi'):
         print("THIS IS A RASPBIAN SYSTEM\n")
@@ -18,13 +23,9 @@ elif platform.system() == "Windows":
     print("THIS IS A WINDOWS SYSTEM\n")
 else:
     print("I DON'T KNOW WHAT SYSTEM THIS IS\n")
-import threading
+
 
 # from loguru import logger
-
-import LoRa
-import sensor
-
 # import multiprocessing as mp
 
 
@@ -44,7 +45,8 @@ def handler(signum, frame) -> None:
     signame = reads the name of the interrupt to the user
     """
     signame = signal.Signals(signum).name
-    logging.error(f'Signal handler called with signal {signame} ({signum})')
+    logging.error("Signal handler called with signal %s (%d)", signame, signum)
+    logging.info("Frame = %s", frame)
 
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
@@ -68,7 +70,8 @@ def thread1() -> None:
     while not END:
         # global PACKET_QUEUE
         if len(PACKET_QUEUE) > 0:
-            LoRa.run(PACKET_QUEUE.pop(0))
+            src.send(PACKET_QUEUE.pop(0))
+        time.sleep(1)
     logging.info("Thread 1 finished.")
 
 def thread2() -> None:
@@ -83,7 +86,8 @@ def thread2() -> None:
     """
     # global END
     while not END:
-        PACKET_QUEUE.append(sensor.run())
+        PACKET_QUEUE.append(src.collect())
+        time.sleep(1)
     logging.info("Thread 2 finished.")
 
 def main():
@@ -94,8 +98,8 @@ def main():
     """
     try:
         # Configuring startup settings
-        format = "%(asctime)s | main\t\t: %(message)s"
-        logging.basicConfig(format=format, level=logging.INFO,
+        fmt_main = "%(asctime)s | main\t\t: %(message)s"
+        logging.basicConfig(format=fmt_main, level=logging.INFO,
                             datefmt="%Y-%m-%D %H:%M:%S")
         logging.info("Starting up device...")
         # logger.info("Main      : Starting up device...")
@@ -118,8 +122,8 @@ def main():
         t1.join()
         t2.join()
         logging.info("All Threads finished...exiting")
-    except ValueError as ve:
-        return str(ve)
+    except ValueError as val_err:
+        return str(val_err)
 
 if __name__ == "__main__":
     sys.exit(main())

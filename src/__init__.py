@@ -1,2 +1,4 @@
-# __init__.py
-from .main.py import main
+""" __init__.py
+"""
+from .LoRa import send
+from .sensor import collect
