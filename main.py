@@ -11,22 +11,23 @@ import signal
 import sys
 import threading
 import time
+import os
 
 import src
 
-if platform.system() == "Linux":
-    if platform.release().find('raspi'):
-        print("THIS IS A RASPBIAN SYSTEM\n")
-    else:
-        print("THIS IS A LINUX SYSTEM\n")
-elif platform.system() == "Windows":
-    print("THIS IS A WINDOWS SYSTEM\n")
-else:
-    print("I DON'T KNOW WHAT SYSTEM THIS IS\n")
-
-
-# from loguru import logger
-# import multiprocessing as mp
+CORES = os.cpu_count()
+# CORES = 4         # FOR DEBUGGING ONLY
+# RPI = False
+# if platform.system() == "Linux":
+#     if platform.release().find('raspi'):
+#         print("THIS IS A RASPBIAN SYSTEM\n")
+#         RPI = True
+#     else:
+#         print("THIS IS A LINUX SYSTEM\n")
+# elif platform.system() == "Windows":
+#     print("THIS IS A WINDOWS SYSTEM\n")
+# else:
+#     print("I DON'T KNOW WHAT SYSTEM THIS IS\n")
 
 
 END = False # Global Variable that kills threads
@@ -51,8 +52,11 @@ def handler(signum, frame) -> None:
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
         logging.info("User manually initiated shutdown using \"CTRL+C\"...")
-        global END
-        END = True
+        if CORES > 1:
+            global END
+            END = True
+        else:
+            sys.exit(2)
 
     # TODO: Handles a memory access conflict from two threads overlapping
 
@@ -66,13 +70,16 @@ def thread1() -> None:
     """
 
 
-    # global END
+    global END
     while not END:
         # global PACKET_QUEUE
         if len(PACKET_QUEUE) > 0:
             src.send(PACKET_QUEUE.pop(0))
+        elif CORES == 1:
+            END = True
         time.sleep(1)
-    logging.info("Thread 1 finished.")
+    if CORES != 1:
+        logging.info("Thread 1 finished.")
 
 def thread2() -> None:
     """Second Thread of the program, calls the "run" function of the Sensor Module.
@@ -84,11 +91,14 @@ def thread2() -> None:
     NOTE:   If we run this on the pico, this will have to be run on the main thread instead due to
             only having 2 cores
     """
-    # global END
+    global END
     while not END:
         PACKET_QUEUE.append(src.collect())
+        if CORES == 1:
+            END = True
         time.sleep(1)
-    logging.info("Thread 2 finished.")
+    if CORES != 1:
+        logging.info("Thread 2 finished.")
 
 def main():
     """
@@ -105,27 +115,42 @@ def main():
         # logger.info("Main      : Starting up device...")
         signal.signal(signal.SIGINT, handler)
 
-        # Setting up Threads
-        t1 = threading.Thread(target=thread1)
-        t2 = threading.Thread(target=thread2)
-        # t1 = mp.Process(target=thread1)
-        # t2 = mp.Process(target=thread2)
-        t1.start()
-        t2.start()
-        logging.info("Threads Launched...")
+        # Setting up Threads based on core count
+        if CORES <= 0:
+            logging.error("CORE COUNT MUST BE A POSITIVE INTEGER")
+        elif CORES == 1:
+            while True:
+                global END
+                thread2()
+                END = False
+                thread1()
+                END = False
+        elif CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
+            t1 = threading.Thread(target=thread2)
+            t1.start()
+            logging.info("Threads Launched...")
+            thread1()       # This is a blocking function call, so anything after this won't run until END
+            
+            # Safely closing all threads
+            t1.join()
+        else:
+            t1 = threading.Thread(target=thread1)
+            t2 = threading.Thread(target=thread2)
+            # t1 = mp.Process(target=thread1)
+            # t2 = mp.Process(target=thread2)
+            t1.start()
+            t2.start()
+            logging.info("Threads Launched...")
 
-        # Safely closing all threads
-        while True:
-            if END:
-                break
-
-        t1.join()
-        t2.join()
+            while True: # Because the other threads are not blocking, this will block until CTRL+C
+                if END:
+                    break
+            # Safely closing all threads
+            t1.join()
+            t2.join()
         logging.info("All Threads finished...exiting")
-    except ValueError as val_err:
+    except ValueError as val_err:       # TODO: ERIN: add more exception handling here
         return str(val_err)
 
 if __name__ == "__main__":
     sys.exit(main())
-    # with logger.catch():
-    #     main()
