@@ -1,30 +1,34 @@
 """
-Sensor Thread Main
+Sensor Thread
+This file in the module will handle the packaging of sensor data
+It will be responsible for the GPIO interface with sensor equipment
 """
 import logging
-import time
-import os
+from .constants import RPI
+if RPI is True:
+    ### DEFINE GPIO PINS ###
+    import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.board)
+    ## GPIO.setup
+    ## GPIO.output
 
-# TODO: How can we set this up to automate testing?
-### DEFINE GPIO PINS ###
-## GPIO.setmode
-## GPIO.setup
-# GPS
-TX = 14
-RX = 15
-# Lightning Sensor
-CS = 5 # arbitrary
-IRQ = 6 # arbitrary
-SCL = 3
-MISO = 9
-MOSI = 10
+    # GPS
+    TX = 14
+    RX = 15
 
-# GPIO.add_event_detect()
-# RTC
+    # Lightning Sensor
+    CS = 5 # arbitrary - control select
+    IRQ = 6 # arbitrary pin, used to indicate that lightning was detected
+    SCL = 3
+    MISO = 9
+    MOSI = 10
 
-RST = 17 # arbitrary
-SDA = 2
-SCL = 3
+    # GPIO.add_event_detect()
+
+    # RTC
+    RST = 17 # arbitrary
+    SDA = 2
+    SCL = 3
 
 def lightning_sensor() -> int:
     """
@@ -41,12 +45,15 @@ def lightning_sensor() -> int:
 
     """
     # if IRQ
-    return -1;
+    return -1
 
 def rtc_module() -> str:
+    """
+    Interacts with the Real Time Clock Module
+    """
     return ""
 
-def run() -> int:
+def collect() -> str:
     """
     This thread will handle all communications with the sensors and create new packets
 
@@ -57,8 +64,8 @@ def run() -> int:
     TODO: Packet creating
     FIXME: Does GPS go here or with LoRa?
     """
-    format = "%(asctime)s | Sensor\t\t: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,
+    fmt_sensor = "%(asctime)s | Sensor\t\t: %(message)s"
+    logging.basicConfig(format=fmt_sensor, level=logging.INFO,
                         datefmt="%H:%M:%S")
     lightning_detected = -1
 
@@ -71,19 +78,18 @@ def run() -> int:
     tstmp = rtc_module()
 
     # Append to PACKET_QUEUE
-    PACKET = tstmp + str(lightning_detected)
-    logging.info(f"\t{__name__=}\t|\t{PACKET=}")
-    time.sleep(1)
+    packet = tstmp + str(lightning_detected)
+    logging.info("\t__name__=%s\t|\tpacket=%s", __name__, packet)
 
-    return PACKET
+    return packet
 
 if __name__ == "__main__":
     ### Main Block for Sensors - this will only be run if using Sensors individually
     # Configuring startup settings
-    format = "%(asctime)s | Sensor\t\t: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO,
+    FMT = "%(asctime)s | Sensor\t\t: %(message)s"
+    logging.basicConfig(format=FMT, level=logging.INFO,
                         datefmt="%H:%M:%S")
 
     PACKET_QUEUE = []
-    PACKET_QUEUE.append(run())
-    logging.info(f"\"run()\" function returned with code {PACKET_QUEUE}")
+    PACKET_QUEUE.append(collect())
+    logging.info("\"collect()\" function returned with code %s", PACKET_QUEUE)
