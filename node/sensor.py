@@ -1,37 +1,34 @@
 """
-Sensor Thread Main
+Sensor Thread
+This file in the module will handle the packaging of sensor data
+It will be responsible for the GPIO interface with sensor equipment
 """
 import logging
-import platform
-RPI = False
-# TODO: How can we set this up to automate testing?
-if platform.system() == "Linux":
-    if platform.release().find('raspi'):
-        print("THIS IS A RASPBIAN SYSTEM\n")
-        RPI = True
-        ### DEFINE GPIO PINS ###
-        import RPi.GPIO as GPIO
-        GPIO.setmode(GPIO.board)
-        ## GPIO.setup
-        ## GPIO.output
+from .constants import RPI
+if RPI is True:
+    ### DEFINE GPIO PINS ###
+    import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.board)
+    ## GPIO.setup
+    ## GPIO.output
 
-        # GPS
-        TX = 14
-        RX = 15
+    # GPS
+    TX = 14
+    RX = 15
 
-        # Lightning Sensor
-        CS = 5 # arbitrary - control select
-        IRQ = 6 # arbitrary pin, used to indicate that lightning was detected
-        SCL = 3
-        MISO = 9
-        MOSI = 10
+    # Lightning Sensor
+    CS = 5 # arbitrary - control select
+    IRQ = 6 # arbitrary pin, used to indicate that lightning was detected
+    SCL = 3
+    MISO = 9
+    MOSI = 10
 
-        # GPIO.add_event_detect()
+    # GPIO.add_event_detect()
 
-        # RTC
-        RST = 17 # arbitrary
-        SDA = 2
-        SCL = 3
+    # RTC
+    RST = 17 # arbitrary
+    SDA = 2
+    SCL = 3
 
 def lightning_sensor() -> int:
     """

@@ -2,26 +2,23 @@
 LoRa Thread Main
 """
 import logging
-import platform
-RPI = False
-if platform.system() == "Linux":
-    if platform.release().find('raspi'):
-        print("THIS IS A RASPBIAN SYSTEM\n")
-        RPI = True
-        ### DEFINE GPIO PINS ###
-        import RPi.GPIO as GPIO     # GPIO
-        import adafruit_rfm9x       # LoRa
-        GPIO.setmode(GPIO.board)
-        ## GPIO.setup
-        ## GPIO.output
-        
-        # Configure LoRa Radio
-        # CS =  # arbitrary - control select
-        # RST =  #arbitrary - reset
-        # spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-        # rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
-        # rfm9x.tx_power = 23
-        # prev_packet = None
+from .constants import RPI
+
+if RPI is True:
+    ### DEFINE GPIO PINS ###
+    import RPi.GPIO as GPIO     # GPIO
+    import adafruit_rfm9x       # LoRa
+    GPIO.setmode(GPIO.board)
+    ## GPIO.setup
+    ## GPIO.output
+    
+    # Configure LoRa Radio
+    # CS =  # arbitrary - control select
+    # RST =  #arbitrary - reset
+    # spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+    # rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
+    # rfm9x.tx_power = 23
+    # prev_packet = None
 
 
 def send(packet) -> int:

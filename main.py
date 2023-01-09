@@ -15,27 +15,13 @@ import os
 
 import node
 
-CORES = os.cpu_count()
-# CORES = 4         # FOR DEBUGGING ONLY
-# RPI = False
-# if platform.system() == "Linux":
-#     if platform.release().find('raspi'):
-#         print("THIS IS A RASPBIAN SYSTEM\n")
-#         RPI = True
-#     else:
-#         print("THIS IS A LINUX SYSTEM\n")
-# elif platform.system() == "Windows":
-#     print("THIS IS A WINDOWS SYSTEM\n")
-# else:
-#     print("I DON'T KNOW WHAT SYSTEM THIS IS\n")
-
-
+from node import CORES
+from node import RPI
 END = False # Global Variable that kills threads
 PACKET_QUEUE = [] # Sensor thread indicates when a package is ready
 
 def handler(signum, frame) -> None:
-    """
-    This function will handle any system interrupts that we decide to use
+    """This function will handle any system interrupts that we decide to use
     It relies on the "signal" python library (see documentation below)
     https://docs.python.org/3/library/signal.html
 
@@ -106,15 +92,23 @@ def main():
 
     This will handle the two different threads
     """
-    try:
-        # Configuring startup settings
-        fmt_main = "%(asctime)s | main\t\t: %(message)s"
-        logging.basicConfig(format=fmt_main, level=logging.INFO,
-                            datefmt="%Y-%m-%D %H:%M:%S")
-        logging.info("Starting up device...")
-        # logger.info("Main      : Starting up device...")
-        signal.signal(signal.SIGINT, handler)
+    # Initial Logger Settings
+    fmt_main = "%(asctime)s | main\t\t: %(message)s"
+    logging.basicConfig(format=fmt_main, level=logging.INFO,
+                        datefmt="%Y-%m-%D %H:%M:%S")
+    
+    # System Settings
+    if RPI:
+        logging.info("* GPIO ENABLED...")
+    else:
+        logging.info("* GPIO DISABLED...")
 
+    logging.info("* Starting up device with %d Cores...", CORES)
+
+    # Initialize Listener (for CTRL+C interrupts)
+    signal.signal(signal.SIGINT, handler)
+
+    try:
         # Setting up Threads based on core count
         if CORES <= 0:
             logging.error("CORE COUNT MUST BE A POSITIVE INTEGER")
@@ -136,8 +130,6 @@ def main():
         else:
             t1 = threading.Thread(target=thread1)
             t2 = threading.Thread(target=thread2)
-            # t1 = mp.Process(target=thread1)
-            # t2 = mp.Process(target=thread2)
             t1.start()
             t2.start()
             logging.info("Threads Launched...")
