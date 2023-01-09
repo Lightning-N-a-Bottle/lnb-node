@@ -13,7 +13,7 @@ import threading
 import time
 import os
 
-import src
+import node
 
 CORES = os.cpu_count()
 # CORES = 4         # FOR DEBUGGING ONLY
@@ -74,7 +74,7 @@ def thread1() -> None:
     while not END:
         # global PACKET_QUEUE
         if len(PACKET_QUEUE) > 0:
-            src.send(PACKET_QUEUE.pop(0))
+            node.send(PACKET_QUEUE.pop(0))
         elif CORES == 1:
             END = True
         time.sleep(1)
@@ -93,7 +93,7 @@ def thread2() -> None:
     """
     global END
     while not END:
-        PACKET_QUEUE.append(src.collect())
+        PACKET_QUEUE.append(node.collect())
         if CORES == 1:
             END = True
         time.sleep(1)
