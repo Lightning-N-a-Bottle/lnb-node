@@ -6,12 +6,10 @@ Main Module
 
 """
 import logging
-import platform
 import signal
 import sys
 import threading
 import time
-import os
 
 import node
 

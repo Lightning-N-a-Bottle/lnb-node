@@ -5,7 +5,7 @@ It will be responsible for the GPIO interface with sensor equipment
 """
 import logging
 from .constants import RPI
-if RPI is True:
+if RPI is True:         # TODO: Maybe add an additional file for GPIO operations?
     ### DEFINE GPIO PINS ###
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.board)

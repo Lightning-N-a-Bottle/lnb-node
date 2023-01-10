@@ -4,7 +4,7 @@ LoRa Thread Main
 import logging
 from .constants import RPI
 
-if RPI is True:
+if RPI is True:         # TODO: Maybe add an additional file for GPIO operations?
     ### DEFINE GPIO PINS ###
     import RPi.GPIO as GPIO     # GPIO
     import adafruit_rfm9x       # LoRa
