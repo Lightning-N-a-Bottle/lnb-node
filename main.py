@@ -12,9 +12,8 @@ import threading
 import time
 
 import node
+from node import CORES, RPI
 
-from node import CORES
-from node import RPI
 END = False # Global Variable that kills threads
 PACKET_QUEUE = [] # Sensor thread indicates when a package is ready
 

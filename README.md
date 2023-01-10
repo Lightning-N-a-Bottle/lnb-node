@@ -50,3 +50,9 @@ The process for setting up the code and flashing it to the device is listed belo
     1. **_[TODO: Figure out how to do this, whether it is through pinging or through pyLoRa features]_**
 4. Send the packet across through whatever structure we decided on previously.
 5. We could add a handshake to confirm that the packet was sent properly, however this may be too complex, unnecessary, or slow.
+
+### Documentation
+
+The source code comments aim to follow PEP8 and Doxygen requirements, and an html webpage has been generated using doxygen for documentation purposes.
+
+To recompile the Doxygen html generation, simply run `"doxygen lnb-node"` from the project directory

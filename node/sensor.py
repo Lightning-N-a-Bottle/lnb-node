@@ -4,14 +4,10 @@ This file in the module will handle the packaging of sensor data
 It will be responsible for the GPIO interface with sensor equipment
 """
 import logging
-from .constants import RPI
-if RPI is True:         # TODO: Maybe add an additional file for GPIO operations?
-    ### DEFINE GPIO PINS ###
-    import RPi.GPIO as GPIO
-    GPIO.setmode(GPIO.board)
-    ## GPIO.setup
-    ## GPIO.output
 
+from .constants import RPI
+
+if RPI is True:         # TODO: Maybe add an additional file for GPIO operations?
     # GPS
     TX = 14
     RX = 15
@@ -82,14 +78,3 @@ def collect() -> str:
     logging.info("\t__name__=%s\t|\tpacket=%s", __name__, packet)
 
     return packet
-
-if __name__ == "__main__":
-    ### Main Block for Sensors - this will only be run if using Sensors individually
-    # Configuring startup settings
-    FMT = "%(asctime)s | Sensor\t\t: %(message)s"
-    logging.basicConfig(format=FMT, level=logging.INFO,
-                        datefmt="%H:%M:%S")
-
-    PACKET_QUEUE = []
-    PACKET_QUEUE.append(collect())
-    logging.info("\"collect()\" function returned with code %s", PACKET_QUEUE)

@@ -2,24 +2,16 @@
 LoRa Thread Main
 """
 import logging
-from .constants import RPI
 
-if RPI is True:         # TODO: Maybe add an additional file for GPIO operations?
-    ### DEFINE GPIO PINS ###
-    import RPi.GPIO as GPIO     # GPIO
-    import adafruit_rfm9x       # LoRa
-    GPIO.setmode(GPIO.board)
-    ## GPIO.setup
-    ## GPIO.output
-    
+from .constants import RPI
+if RPI:
     # Configure LoRa Radio
     # CS =  # arbitrary - control select
     # RST =  #arbitrary - reset
     # spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
     # rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
     # rfm9x.tx_power = 23
-    # prev_packet = None
-
+    prev_packet = None
 
 def send(packet) -> int:
     """
@@ -42,14 +34,3 @@ def send(packet) -> int:
         rfm9x.send(packet_data)
 
     return 0
-
-if __name__ == "__main__":
-    ### Main Block for LoRa - this will only be run if using LoRa individually
-    # Configuring startup settings
-    FMT = "%(asctime)s | LoRa\t\t: %(message)s "
-    logging.basicConfig(format=FMT, level=logging.INFO,
-                        datefmt="%H:%M:%S")
-    logging.info("Starting up device...")
-
-    PACKET = "12:34:56,1,1"
-    logging.info("\"send()\" function returned with code %s", send(PACKET))

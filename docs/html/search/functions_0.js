@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lightning_5fsensor_10',['lightning_sensor',['../namespacesrc_1_1sensor.html#a9714d7b75d8fedb0bee0060b51096238',1,'src::sensor']]]
+  ['collect_18',['collect',['../namespacenode_1_1sensor.html#a05e4e278dcb32975e0e93e2436d8d95e',1,'node::sensor']]]
 ];
