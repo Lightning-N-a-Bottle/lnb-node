@@ -14,8 +14,9 @@ import time
 import node
 from node import CORES, RPI
 
-END = False # Global Variable that kills threads
-PACKET_QUEUE = [] # Sensor thread indicates when a package is ready
+NAME = ""           # Name of this node (Assigned by Server)
+END = False         # Global Variable that kills threads
+PACKET_QUEUE = []   # Sensor thread indicates when a package is ready
 
 def handler(signum, frame) -> None:
     """This function will handle any system interrupts that we decide to use
@@ -35,11 +36,14 @@ def handler(signum, frame) -> None:
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
         logging.info("User manually initiated shutdown using \"CTRL+C\"...")
+        if RPI:
+            logging.info("Cleaning up GPIO Pins...")
+            node.gpio.shutdown()
         if CORES > 1:
             global END
             END = True
         else:
-            sys.exit(2)
+            sys.exit(0)
 
     # TODO: Handles a memory access conflict from two threads overlapping
 
@@ -52,17 +56,20 @@ def thread1() -> None:
     They have to be global because the threads are separate and asynchronous.
     """
 
-
-    global END
-    while not END:
-        # global PACKET_QUEUE
-        if len(PACKET_QUEUE) > 0:
-            node.send(PACKET_QUEUE.pop(0))
-        elif CORES == 1:
-            END = True
-        time.sleep(1)
-    if CORES != 1:
-        logging.info("Thread 1 finished.")
+    try:
+        global END
+        while not END:
+            # global PACKET_QUEUE
+            if len(PACKET_QUEUE) > 0:
+                node.send(PACKET_QUEUE.pop(0))
+            elif CORES == 1:
+                END = True
+            time.sleep(1)
+        if CORES != 1:
+            logging.info("Thread 1 finished.")
+    except:
+        logging.error("ISSUE WITH LORA!")
+        END = True
 
 def thread2() -> None:
     """Second Thread of the program, calls the "run" function of the Sensor Module.
@@ -74,14 +81,18 @@ def thread2() -> None:
     NOTE:   If we run this on the pico, this will have to be run on the main thread instead due to
             only having 2 cores
     """
-    global END
-    while not END:
-        PACKET_QUEUE.append(node.collect())
-        if CORES == 1:
-            END = True
-        time.sleep(1)
-    if CORES != 1:
-        logging.info("Thread 2 finished.")
+    try:
+        global END
+        while not END:
+            PACKET_QUEUE.append(node.collect(NAME))
+            if CORES == 1:
+                END = True
+            time.sleep(1)
+        if CORES != 1:
+            logging.info("Thread 2 finished.")
+    except ValueError as val_err:
+        logging.error("ISSUE WITH SENSORS! %s", val_err)
+        END = True
 
 def main():
     """
@@ -97,8 +108,13 @@ def main():
     # System Settings
     if RPI:
         logging.info("* GPIO ENABLED...")
+        node.gpio.setup()
     else:
         logging.info("* GPIO DISABLED...")
+
+    # Initial LoRa exchange
+    global NAME
+    NAME = node.LoRa.init()
 
     logging.info("* Starting up device with %d Cores...", CORES)
 
@@ -138,7 +154,7 @@ def main():
             t1.join()
             t2.join()
         logging.info("All Threads finished...exiting")
-    except ValueError as val_err:       # TODO: ERIN: add more exception handling here
+    except ValueError as val_err:       # TODO: Handle other error types better
         return str(val_err)
 
 if __name__ == "__main__":

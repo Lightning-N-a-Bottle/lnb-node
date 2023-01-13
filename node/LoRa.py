@@ -2,16 +2,17 @@
 LoRa Thread Main
 """
 import logging
+from .gpio import gps
 
-from .constants import RPI
-if RPI:
-    # Configure LoRa Radio
-    # CS =  # arbitrary - control select
-    # RST =  #arbitrary - reset
-    # spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-    # rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, 915.0)
-    # rfm9x.tx_power = 23
-    prev_packet = None
+def init() -> str:
+    packet = gps()
+    send(packet)        # Send GPS data to Raspberry Pi
+    name = receive()    # Receives new name from the Raspberry Pi
+    logging.info("This Node is now named: %s", name)
+    return name
+
+def receive() -> str:
+    return "testname"
 
 def send(packet) -> int:
     """
@@ -27,10 +28,9 @@ def send(packet) -> int:
     fmt_lora = "%(asctime)s | LoRa\t\t: %(message)s"
     logging.basicConfig(format=fmt_lora, level=logging.INFO,
                         datefmt="%H:%M:%S")
-    logging.info("\t__name__=%s\t|\tpacket=%s\n", __name__, packet)
+    if "PACK:" in packet:
+        logging.info("\t__name__=%s\t|\tpacket=%s\n", __name__, packet)
 
-    if RPI:
-        packet_data = bytes(packet)
-        rfm9x.send(packet_data)
+
 
     return 0
