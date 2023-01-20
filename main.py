@@ -55,21 +55,18 @@ def thread1() -> None:
     The loop relies on a global variable to determine when the threads should be killed.
     They have to be global because the threads are separate and asynchronous.
     """
-
-    try:
-        global END
-        while not END:
-            # global PACKET_QUEUE
-            if len(PACKET_QUEUE) > 0:
-                node.send(PACKET_QUEUE.pop(0))
-            elif CORES == 1:
-                END = True
-            time.sleep(1)
-        if CORES != 1:
-            logging.info("Thread 1 finished.")
-    except:
-        logging.error("ISSUE WITH LORA!")
-        END = True
+    global END
+    while not END:
+        # global PACKET_QUEUE
+        if len(PACKET_QUEUE) > 0:
+            node.send(PACKET_QUEUE.pop(0))
+        elif CORES == 1:
+            END = True
+        time.sleep(1)
+    if CORES != 1:
+        logging.info("Thread 1 finished.")
+    # logging.error("ISSUE WITH LORA!")
+    END = True
 
 def thread2() -> None:
     """Second Thread of the program, calls the "run" function of the Sensor Module.

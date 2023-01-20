@@ -47,6 +47,7 @@ if RPI:
     ### DEFINE GPIO PINS ###
     import RPi.GPIO as GPIO
     import busio
+    import board
     import smbus
     import adafruit_rfm9x
 
@@ -128,7 +129,7 @@ def setup():
         # GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
 
         global SPI, rfm9x
-        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
+        SPI = busio.SPI(board.SCK, MOSI=DI, MISO=DO)
         rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
         rfm9x.tx_power = 23
     return 0
