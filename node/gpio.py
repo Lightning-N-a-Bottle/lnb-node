@@ -47,7 +47,7 @@ if RPI:
     ### DEFINE GPIO PINS ###
     import RPi.GPIO as GPIO
     import busio
-    import board
+    from digitalio import DigitalInOut, Direction, Pull
     import smbus
     import adafruit_rfm9x
 
@@ -116,10 +116,9 @@ def setup():
         GPIO.setup(B1, GPIO.IN)
         GPIO.setup(B2, GPIO.IN)
         GPIO.setup(B3, GPIO.IN)
-        GPIO.setup(CLK, GPIO.OUT)
-        GPIO.setup(LORA_CS, GPIO.OUT)
-        GPIO.setup(LORA_RST, GPIO.OUT)
         ## GPIO.output
+        lora_cs = DigitalInOut(LORA_CS)
+        lora_rst = DigitalInOut(LORA_RST)
 
         ## Event Detectors for buttons and Lightning Sensor
         GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_handler_rising)
@@ -133,7 +132,7 @@ def setup():
 
         global SPI, rfm9x
         SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
-        rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
+        rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, 915.0)
         rfm9x.tx_power = 23
     return 0
 
