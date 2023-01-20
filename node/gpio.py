@@ -40,11 +40,14 @@ B1 = 5          # GPIO 5 or Pin 29  |
 B2 = 6          # GPIO 6 or Pin 12  |
 B3 = 12         # GPIO 12 or Pin 32 |
 
+SPI = None
 rfm9x = None
 
 if RPI:
     ### DEFINE GPIO PINS ###
     import RPi.GPIO as GPIO
+    import busio
+    import smbus
     import adafruit_rfm9x
 
     # FROM LORAMESH EX
@@ -54,10 +57,6 @@ if RPI:
     # import ubinascii
     # import py_com
     # from loramesh import Loramesh
-
-
-    import busio
-    import smbus
 
 
 def shutdown_rising(pin):
@@ -129,6 +128,7 @@ def setup():
             GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_handler_rising)
             GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
 
+            global SPI, rfm9x
             SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
             rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
             rfm9x.tx_power = 23
