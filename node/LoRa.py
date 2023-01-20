@@ -2,17 +2,23 @@
 LoRa Thread Main
 """
 import logging
-from .gpio import gps
+from .gpio import gps, lora_tx, lora_rx
 
 def init() -> str:
+    """
+    Initializes the Lora connection
+    """
     packet = gps()
     send(packet)        # Send GPS data to Raspberry Pi
     name = receive()    # Receives new name from the Raspberry Pi
-    logging.info("This Node is now named: %s", name)
+    logging.info("* This Node is now named:\t%s", name)
     return name
 
 def receive() -> str:
-    return "testname"
+    """
+    
+    """
+    return lora_rx()
 
 def send(packet) -> int:
     """
@@ -28,9 +34,15 @@ def send(packet) -> int:
     fmt_lora = "%(asctime)s | LoRa\t\t: %(message)s"
     logging.basicConfig(format=fmt_lora, level=logging.INFO,
                         datefmt="%H:%M:%S")
+    
+    # Debug packet
     if "PACK:" in packet:
         logging.info("\t__name__=%s\t|\tpacket=%s\n", __name__, packet)
-
+    else:
+        logging.info("* GPS NMEA Data\t=\t%s", packet)
+    
+    # Send Packet
+    lora_tx(packet)
 
 
     return 0

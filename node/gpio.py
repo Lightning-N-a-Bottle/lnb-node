@@ -40,38 +40,69 @@ B1 = 5          # GPIO 5 or Pin 29  |
 B2 = 6          # GPIO 6 or Pin 12  |
 B3 = 12         # GPIO 12 or Pin 32 |
 
+rfm9x = None
+
 if RPI:
     ### DEFINE GPIO PINS ###
     import RPi.GPIO as GPIO
     import adafruit_rfm9x
 
     # FROM LORAMESH EX
-    from network import LoRa
-    import socket
-    import time
-    import ubinascii
-    import py_com
-    from loramesh import Loramesh
+    # from network import LoRa
+    # import socket
+    # import time
+    # import ubinascii
+    # import py_com
+    # from loramesh import Loramesh
 
 
     import busio
-    SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
-
     import smbus
 
-def BtnEventHandler_rising(pin):
-    logging.info("Rising Button Event on pin %d!", pin)
+
+def shutdown_rising(pin):
+    """
+    Debug Button Rising Event Handlers
+    TODO: Remove Later
+    """
+    logging.info("Shutdown pin pressed! Release to continue!")
     return 0
 
-def BtnEventHandler_falling(pin):
+def shutdown_falling(pin):
+    """
+    Debug Button Falling Event Handlers
+    TODO: Remove Later
+    """
     logging.info("Falling Button Event on pin %d!", pin)
     return 0
 
-def LSEventHandler_rising(pin):
+def btn_handler_rising(pin):
+    """
+    Debug Button Rising Event Handlers
+    TODO: Remove Later
+    """
+    logging.info("Rising Button Event on pin %d!", pin)
+    return 0
+
+def btn_handler_falling(pin):
+    """
+    Debug Button Falling Event Handlers
+    TODO: Remove Later
+    """
+    logging.info("Falling Button Event on pin %d!", pin)
+    return 0
+
+def ls_handler_rising(pin):
+    """
+    Lightning Sensor Interrupt Pin Rising Event Handler
+    """
     logging.info("Rising Lightning Sensor Event on pin %d!", pin)
     return 0
 
-def LSEventHandler_falling(pin):
+def ls_handler_falling(pin):
+    """
+    Lightning Sensor Interrupt Pin Falling Event Handler
+    """
     logging.info("Falling Lightning Sensor Event on pin %d!", pin)
     return 0
 
@@ -89,22 +120,45 @@ def setup():
             ## GPIO.output
 
             ## Event Detectors for buttons and Lightning Sensor
-            GPIO.add_event_detect(B1, GPIO.RISING, callback=BtnEventHandler_rising)
-            GPIO.add_event_detect(B1, GPIO.FALLING, callback=BtnEventHandler_falling)
-            GPIO.add_event_detect(B2, GPIO.RISING, callback=BtnEventHandler_rising)
-            GPIO.add_event_detect(B2, GPIO.FALLING, callback=BtnEventHandler_falling)
-            GPIO.add_event_detect(B3, GPIO.RISING, callback=BtnEventHandler_rising)
-            GPIO.add_event_detect(B3, GPIO.FALLING, callback=BtnEventHandler_falling)
-            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=LSEventHandler_rising)
-            GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=LSEventHandler_falling)
+            GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_handler_rising)
+            GPIO.add_event_detect(B1, GPIO.FALLING, callback=btn_handler_falling)
+            GPIO.add_event_detect(B2, GPIO.RISING, callback=shutdown_rising)
+            GPIO.add_event_detect(B2, GPIO.FALLING, callback=shutdown_falling)
+            GPIO.add_event_detect(B3, GPIO.RISING, callback=btn_handler_rising)
+            GPIO.add_event_detect(B3, GPIO.FALLING, callback=btn_handler_falling)
+            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_handler_rising)
+            GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
 
+            SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
             rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
             rfm9x.tx_power = 23
     except:
         cleanup()
     return 0
 
+def lora_tx(packet:str) -> None:
+    """
+    Sends the packet
+    """
+    if RPI:
+        """ COPY/PASTED MESH CODE """
+        rfm9x.send(packet)
+
+def lora_rx() -> str:
+    """
+    Sends the packet
+    """
+    if RPI:
+        """ COPY/PASTED MESH CODE """
+        packet = rfm9x.receive()
+    else:
+        packet = "Receive,Example,Packet"
+    return packet
+
 def gps():
+    """
+    Acquires and returns GPS data in NMEA form
+    """
     if RPI:
         nmea = "loc"
     else:
@@ -144,6 +198,7 @@ def lightning() -> str:
     return f"{distance},{intensity}"
 
 def cleanup():
+    """ Cleanup GPIO pins before shutdown if RPi is active """
     if RPI:
         logging.info("Cleaning up GPIO pins")
         GPIO.cleanup()

@@ -38,7 +38,7 @@ def handler(signum, frame) -> None:
         logging.info("User manually initiated shutdown using \"CTRL+C\"...")
         if RPI:
             logging.info("Cleaning up GPIO Pins...")
-            node.gpio.shutdown()
+            node.gpio.cleanup()
         if CORES > 1:
             global END
             END = True
