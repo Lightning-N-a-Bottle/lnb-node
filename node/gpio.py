@@ -109,7 +109,7 @@ def setup():
     """
     Initializes RPI GPIO pins
     """
-    try:
+    # try:
         if RPI:
             GPIO.setmode(GPIO.BCM)
             ## GPIO.setup
@@ -132,8 +132,8 @@ def setup():
             SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
             rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
             rfm9x.tx_power = 23
-    except:
-        cleanup()
+    # except:
+        # cleanup()
     return 0
 
 def lora_tx(packet:str) -> None:
@@ -142,6 +142,7 @@ def lora_tx(packet:str) -> None:
     """
     if RPI:
         """ COPY/PASTED MESH CODE """
+        global rfm9x
         rfm9x.send(packet)
 
 def lora_rx() -> str:
@@ -150,6 +151,7 @@ def lora_rx() -> str:
     """
     if RPI:
         """ COPY/PASTED MESH CODE """
+        global rfm9x
         packet = rfm9x.receive()
     else:
         packet = "Receive,Example,Packet"
