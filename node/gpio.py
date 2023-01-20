@@ -116,6 +116,9 @@ def setup():
         GPIO.setup(B1, GPIO.IN)
         GPIO.setup(B2, GPIO.IN)
         GPIO.setup(B3, GPIO.IN)
+        GPIO.setup(CLK, GPIO.OUT)
+        GPIO.setup(LORA_CS, GPIO.OUT)
+        GPIO.setup(LORA_RST, GPIO.OUT)
         ## GPIO.output
 
         ## Event Detectors for buttons and Lightning Sensor
@@ -129,7 +132,7 @@ def setup():
         # GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
 
         global SPI, rfm9x
-        SPI = busio.SPI(board.SCK, MOSI=DI, MISO=DO)
+        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
         rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
         rfm9x.tx_power = 23
     return 0
