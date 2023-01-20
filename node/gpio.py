@@ -109,31 +109,28 @@ def setup():
     """
     Initializes RPI GPIO pins
     """
-    # try:
-        if RPI:
-            GPIO.setmode(GPIO.BCM)
-            ## GPIO.setup
-            GPIO.setup(B1, GPIO.IN)
-            GPIO.setup(B2, GPIO.IN)
-            GPIO.setup(B3, GPIO.IN)
-            ## GPIO.output
+    if RPI:
+        GPIO.setmode(GPIO.BCM)
+        ## GPIO.setup
+        GPIO.setup(B1, GPIO.IN)
+        GPIO.setup(B2, GPIO.IN)
+        GPIO.setup(B3, GPIO.IN)
+        ## GPIO.output
 
-            ## Event Detectors for buttons and Lightning Sensor
-            GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_handler_rising)
-            GPIO.add_event_detect(B1, GPIO.FALLING, callback=btn_handler_falling)
-            GPIO.add_event_detect(B2, GPIO.RISING, callback=shutdown_rising)
-            GPIO.add_event_detect(B2, GPIO.FALLING, callback=shutdown_falling)
-            GPIO.add_event_detect(B3, GPIO.RISING, callback=btn_handler_rising)
-            GPIO.add_event_detect(B3, GPIO.FALLING, callback=btn_handler_falling)
-            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_handler_rising)
-            GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
+        ## Event Detectors for buttons and Lightning Sensor
+        GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_handler_rising)
+        GPIO.add_event_detect(B1, GPIO.FALLING, callback=btn_handler_falling)
+        GPIO.add_event_detect(B2, GPIO.RISING, callback=shutdown_rising)
+        GPIO.add_event_detect(B2, GPIO.FALLING, callback=shutdown_falling)
+        GPIO.add_event_detect(B3, GPIO.RISING, callback=btn_handler_rising)
+        GPIO.add_event_detect(B3, GPIO.FALLING, callback=btn_handler_falling)
+        GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_handler_rising)
+        GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
 
-            global SPI, rfm9x
-            SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
-            rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
-            rfm9x.tx_power = 23
-    # except:
-        # cleanup()
+        global SPI, rfm9x
+        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
+        rfm9x = adafruit_rfm9x.RFM9x(SPI, LORA_CS, LORA_RST, 915.0)
+        rfm9x.tx_power = 23
     return 0
 
 def lora_tx(packet:str) -> None:
