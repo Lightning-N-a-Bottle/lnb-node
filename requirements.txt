@@ -1,1 +1,3 @@
-# Include all necessary pip installs
+# pip install -r requirements.txt
+busio
+as3935-0.1.4
