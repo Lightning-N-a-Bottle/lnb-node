@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['rpi_9',['RPI',['../namespacenode_1_1constants.html#aedde93bb8b9c21404636f6a6ce573c6b',1,'node::constants']]],
-  ['rtc_5fmodule_10',['rtc_module',['../namespacenode_1_1sensor.html#a8b1cb97b7a2c87867936e53d08150a4f',1,'node::sensor']]]
+  ['gps_7',['gps',['../namespacenode_1_1gpio.html#aafca24134a7e0f05f0ce0aae6335e58a',1,'node::gpio']]],
+  ['gps_5ftx_8',['GPS_TX',['../namespacenode_1_1gpio.html#ad480f0780c8eb9c0ec862ea22708e586',1,'node::gpio']]]
 ];

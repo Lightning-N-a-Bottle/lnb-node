@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['collect_18',['collect',['../namespacenode_1_1sensor.html#a05e4e278dcb32975e0e93e2436d8d95e',1,'node::sensor']]]
+  ['btn_5fhandler_5ffalling_37',['btn_handler_falling',['../namespacenode_1_1gpio.html#aef090f2cd5c5c657b39a549d5c862879',1,'node::gpio']]],
+  ['btn_5fhandler_5frising_38',['btn_handler_rising',['../namespacenode_1_1gpio.html#a0286c205438e5d422769c3272e3ca951',1,'node::gpio']]]
 ];
