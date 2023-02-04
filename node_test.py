@@ -17,8 +17,16 @@ import sys
 import node
 
 class TestSensorHandling(unittest.TestCase):
+    """
+    Class of Node Test Cases
+    """
 
     def test_gps(self):
+        """Test the GPS output
+        This will only work if the GPS has the TX/RX, VCC, and GND pins connected
+        In addition, the output data will be mostly blank if the antenna is disconnected
+        
+        """
         self.assertEqual(1, 1)
 
     def test_rts(self):

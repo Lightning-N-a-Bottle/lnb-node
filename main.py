@@ -3,7 +3,10 @@ Main Module
 
 - Documentation Notes:
     - https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
-
+- TODO:
+    - look into machine package - https://docs.micropython.org/en/latest/library/machine.html
+    - sleep and wake from ls spi connection to save power
+    - 
 """
 import logging
 import signal
