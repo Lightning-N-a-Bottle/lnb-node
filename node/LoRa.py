@@ -2,7 +2,9 @@
 LoRa Thread Main
 """
 import logging
-from .gpio import gps, lora_tx, lora_rx
+
+from .gpio import gps, lora_rx, lora_tx
+
 
 def init() -> str:
     """
@@ -16,9 +18,13 @@ def init() -> str:
 
 def receive() -> str:
     """
-    
+    Listen for incoming LoRa packets
+    This should hypothetically be the default state
     """
-    return lora_rx()
+    pack = ""
+    while pack != "":
+        pack = lora_rx()
+    return pack
 
 def send(packet) -> int:
     """
@@ -34,13 +40,13 @@ def send(packet) -> int:
     fmt_lora = "%(asctime)s | LoRa\t\t: %(message)s"
     logging.basicConfig(format=fmt_lora, level=logging.INFO,
                         datefmt="%H:%M:%S")
-    
+
     # Debug packet
     if "PACK:" in packet:
         logging.info("\t__name__=%s\t|\tpacket=%s\n", __name__, packet)
     else:
         logging.info("* GPS NMEA Data\t=\t%s", packet)
-    
+
     # Send Packet
     lora_tx(packet)
 

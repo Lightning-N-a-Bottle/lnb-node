@@ -15,9 +15,8 @@ import threading
 import time
 
 import node
-from node import CORES, RPI
+from node import CORES, NAME, RPI
 
-NAME = ""           # Name of this node (Assigned by Server)
 END = False         # Global Variable that kills threads
 PACKET_QUEUE = []   # Sensor thread indicates when a package is ready
 
@@ -113,7 +112,6 @@ def main():
         logging.info("* GPIO DISABLED...")
 
     # Initial LoRa exchange
-    global NAME
     NAME = node.LoRa.init()
 
     logging.info("* Starting up device with %d Cores...", CORES)
