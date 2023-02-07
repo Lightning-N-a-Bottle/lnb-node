@@ -131,11 +131,13 @@ def main():
                 END = False
                 thread1()
                 END = False
+                node.temp_check()
         elif CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
             t1 = threading.Thread(target=thread2)
             t1.start()
             logging.info("Threads Launched...")
             thread1()       # This is a blocking function call, so anything after this won't run until END
+            node.temp_check()
             
             # Safely closing all threads
             t1.join()
@@ -147,6 +149,8 @@ def main():
             logging.info("Threads Launched...")
 
             while True: # Because the other threads are not blocking, this will block until CTRL+C
+                node.temp_check()
+                time.sleep(5)
                 if END:
                     break
             # Safely closing all threads

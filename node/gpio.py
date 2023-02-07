@@ -60,23 +60,7 @@ if RPI:
     # from loramesh import Loramesh
 
 
-def shutdown_rising(pin):
-    """
-    Debug Button Rising Event Handlers
-    TODO: Remove Later
-    """
-    logging.info("Shutdown pin pressed! Release to continue!")
-    return 0
-
-def shutdown_falling(pin):
-    """
-    Debug Button Falling Event Handlers
-    TODO: Remove Later
-    """
-    logging.info("Falling Button Event on pin %d!", pin)
-    return 0
-
-def btn_handler_rising(pin):
+def btn_event(pin) -> int:
     """
     Debug Button Rising Event Handlers
     TODO: Remove Later
@@ -84,26 +68,23 @@ def btn_handler_rising(pin):
     logging.info("Rising Button Event on pin %d!", pin)
     return 0
 
-def btn_handler_falling(pin):
-    """
-    Debug Button Falling Event Handlers
-    TODO: Remove Later
-    """
-    logging.info("Falling Button Event on pin %d!", pin)
-    return 0
-
-def ls_handler_rising(pin):
+def ls_event(pin) -> int:
     """
     Lightning Sensor Interrupt Pin Rising Event Handler
     """
     logging.info("Rising Lightning Sensor Event on pin %d!", pin)
     return 0
 
-def ls_handler_falling(pin):
+def temp_check() -> int:
+    """ Checks the current CPU Temperature from the RPi files
+        TODO: Add thresholds for different levels of warnings
+        TODO: Add a return to shutdown if too hot
     """
-    Lightning Sensor Interrupt Pin Falling Event Handler
-    """
-    logging.info("Falling Lightning Sensor Event on pin %d!", pin)
+    if RPI:
+        with open('/sys/class/thermal/thermal_zone0/temp') as f:
+            logging.info("Current CPU temp = %f", float(f.read())/1000)
+    else:
+        logging.info("Temperature Check on a non-RPi")
     return 0
 
 def setup():
@@ -121,14 +102,8 @@ def setup():
         lora_rst = DigitalInOut(LORA_RST)
 
         ## Event Detectors for buttons and Lightning Sensor
-        GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_handler_rising)
-        # GPIO.add_event_detect(B1, GPIO.FALLING, callback=btn_handler_falling)
-        # GPIO.add_event_detect(B2, GPIO.RISING, callback=shutdown_rising)
-        # GPIO.add_event_detect(B2, GPIO.FALLING, callback=shutdown_falling)
-        # GPIO.add_event_detect(B3, GPIO.RISING, callback=btn_handler_rising)
-        # GPIO.add_event_detect(B3, GPIO.FALLING, callback=btn_handler_falling)
-        # GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_handler_rising)
-        # GPIO.add_event_detect(LS_IRQ, GPIO.FALLING, callback=ls_handler_falling)
+        GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
+        GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
 
         global SPI, rfm9x
         SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
