@@ -1,3 +1,9 @@
 # pip install -r requirements.txt
-busio
+
+# LoRa Module
+adafruit-circuitpython-ssd1306
+adafruit-circuitpython-framebuf
+adafruit-circuitpython-rfm9x
+
+# Lightning Sensor
 as3935-0.1.4
