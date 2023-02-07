@@ -12,6 +12,3 @@ CORES = os.cpu_count()
 RPI = False
 if platform.system() == "Linux" and platform.release().find('raspi'):
     RPI = True
-
-### NODE IDENTITY
-NAME = ""           # Name of this node (Assigned by Server)

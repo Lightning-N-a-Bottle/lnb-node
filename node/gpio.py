@@ -141,7 +141,7 @@ def lora_tx(packet:str) -> None:
     Sends the packet
     """
     if RPI:
-        """ COPY/PASTED MESH CODE """
+        # FIXME: COPY/PASTED MESH CODE
         global rfm9x
         rfm9x.send(packet)
 
@@ -150,7 +150,7 @@ def lora_rx() -> str:
     Sends the packet
     """
     if RPI:
-        """ COPY/PASTED MESH CODE """
+        # FIXME: COPY/PASTED MESH CODE
         global rfm9x
         packet = rfm9x.receive()
     else:

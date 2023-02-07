@@ -12,8 +12,8 @@ def init() -> str:
     """
     packet = gps()
     send(packet)        # Send GPS data to Raspberry Pi
-    name = receive()    # Receives new name from the Raspberry Pi
-    logging.info("* This Node is now named:\t%s", name)
+    # name = receive()    # Receives new name from the Raspberry Pi FIXME: not blocking
+    name = "name"       # TODO: Remove Later
     return name
 
 def receive() -> str:
@@ -21,12 +21,12 @@ def receive() -> str:
     Listen for incoming LoRa packets
     This should hypothetically be the default state
     """
-    pack = ""
-    while pack != "":
+    pack = ""           # TODO: cleanup
+    while pack == "":
         pack = lora_rx()
     return pack
 
-def send(packet) -> int:
+def send(packet: str) -> int:
     """
     This thread will process all LoRa communications
 
