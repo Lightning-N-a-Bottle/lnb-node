@@ -69,7 +69,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">node.sensor Namespace Reference</div>  </div>
 </div><!--header-->
@@ -77,16 +78,24 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3be0cfbba78723f39c464577d0c5119d"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1sensor.html#a3be0cfbba78723f39c464577d0c5119d">collect</a> (name)</td></tr>
-<tr class="separator:a3be0cfbba78723f39c464577d0c5119d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ef969c971a7daaf4ee0b43668504d62"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1sensor.html#a7ef969c971a7daaf4ee0b43668504d62">setname</a> (str name)</td></tr>
+<tr class="separator:a7ef969c971a7daaf4ee0b43668504d62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05e4e278dcb32975e0e93e2436d8d95e"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1sensor.html#a05e4e278dcb32975e0e93e2436d8d95e">collect</a> ()</td></tr>
+<tr class="separator:a05e4e278dcb32975e0e93e2436d8d95e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a4581b1a595219d13dcdeee4a3e3c0100"><td class="memItemLeft" align="right" valign="top"><a id="a4581b1a595219d13dcdeee4a3e3c0100"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>NAME</b> = &quot;&quot;</td></tr>
+<tr class="separator:a4581b1a595219d13dcdeee4a3e3c0100"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">Sensor Thread
 This file in the module will handle the packaging of sensor data
 It will be responsible for the GPIO interface with sensor equipment
 </pre> </div><h2 class="groupheader">Function Documentation</h2>
-<a id="a3be0cfbba78723f39c464577d0c5119d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3be0cfbba78723f39c464577d0c5119d">&#9670;&nbsp;</a></span>collect()</h2>
+<a id="a05e4e278dcb32975e0e93e2436d8d95e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a05e4e278dcb32975e0e93e2436d8d95e">&#9670;&nbsp;</a></span>collect()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -94,8 +103,7 @@ It will be responsible for the GPIO interface with sensor equipment
         <tr>
           <td class="memname"> str node.sensor.collect </td>
           <td>(</td>
-          <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>name</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -108,6 +116,30 @@ TODO: RTC interface
 TODO: Lightning sensor interface
 TODO: Packet creating
 FIXME: Does GPS go here or with LoRa?
+</pre> 
+</div>
+</div>
+<a id="a7ef969c971a7daaf4ee0b43668504d62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ef969c971a7daaf4ee0b43668504d62">&#9670;&nbsp;</a></span>setname()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> int node.sensor.setname </td>
+          <td>(</td>
+          <td class="paramtype">str&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment"> Modifies name identifier of current node
+The purpose for having the name is to reduce power consumption from the GPS.
+By only acquiring the GPS data on startup, the GPS can be turned off after first measurement.
+The node still must distinguish itself from other nodes, so the server will assign a name.
+
+:param name: str - name assigned to node by server
 </pre> 
 </div>
 </div>

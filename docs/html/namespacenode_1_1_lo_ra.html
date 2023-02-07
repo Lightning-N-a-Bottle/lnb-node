@@ -81,8 +81,8 @@ Functions</h2></td></tr>
 <tr class="separator:aad1be25c1cfbb33569ab59f4f1e133d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33b4d4c64437e1f0956361e6ca01b50d"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#a33b4d4c64437e1f0956361e6ca01b50d">receive</a> ()</td></tr>
 <tr class="separator:a33b4d4c64437e1f0956361e6ca01b50d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2a5082886289f72984e424037723162"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#ad2a5082886289f72984e424037723162">send</a> (packet)</td></tr>
-<tr class="separator:ad2a5082886289f72984e424037723162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad8d0a74d75fd7ce9421c43150c118f4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#aad8d0a74d75fd7ce9421c43150c118f4">send</a> (str packet)</td></tr>
+<tr class="separator:aad8d0a74d75fd7ce9421c43150c118f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">LoRa Thread Main
@@ -119,11 +119,13 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment"></pre> 
+<pre class="fragment">Listen for incoming LoRa packets
+This should hypothetically be the default state
+</pre> 
 </div>
 </div>
-<a id="ad2a5082886289f72984e424037723162"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad2a5082886289f72984e424037723162">&#9670;&nbsp;</a></span>send()</h2>
+<a id="aad8d0a74d75fd7ce9421c43150c118f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad8d0a74d75fd7ce9421c43150c118f4">&#9670;&nbsp;</a></span>send()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -131,7 +133,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="memname"> int node.LoRa.send </td>
           <td>(</td>
-          <td class="paramtype">&#160;</td>
+          <td class="paramtype">str&#160;</td>
           <td class="paramname"><em>packet</em></td><td>)</td>
           <td></td>
         </tr>
