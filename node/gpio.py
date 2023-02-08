@@ -1,10 +1,13 @@
 """
 gpio interface
 
+Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 GPIO Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1gpio.html
 """
 import logging
+import time
+
 from .constants import RPI, LS, RTC, GPS, LORA, FREQ
 
 ### Shared Pins
@@ -59,7 +62,6 @@ if RPI:
     # FROM LORAMESH EX
     # from network import LoRa
     # import socket
-    # import time
     # import ubinascii
     # import py_com
     # from loramesh import Loramesh
@@ -118,6 +120,12 @@ def setup() -> None:
     if RPI:
         GPIO.setmode(GPIO.BCM)
 
+        ## GPIO.setup
+        GPIO.setup(B1, GPIO.IN)
+        GPIO.setup(B2, GPIO.IN)
+        GPIO.setup(B3, GPIO.IN)
+        GPIO.setup(LS_IRQ, GPIO.IN)
+
         ### Communication Protocols
         global I2C, SPI
         I2C = busio.I2C(board.SCL, board.SDA)       # Create the I2C interface
@@ -125,9 +133,6 @@ def setup() -> None:
 
         ## GPIO.output
 
-        ## Event Detectors for buttons and Lightning Sensor
-        GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
-        GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
 
         if LORA:
             ## Setup LoRa Radio
@@ -248,9 +253,18 @@ def lightning() -> str:
 
     """
     if RPI:
-        distance = "2"
-        intensity = "3"
+        if LS:
+            ## Event Detectors for buttons and Lightning Sensor
+            GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
+            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
+
+            while LS_FLAG:
+                time.sleep(.1)
+            
+            distance = "2"
+            intensity = "3"
     else:
+        time.sleep(2)
         distance = "distance"
         intensity = "intensity"
     return f"{distance},{intensity}"

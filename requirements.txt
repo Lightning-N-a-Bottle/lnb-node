@@ -1,4 +1,6 @@
 # pip install -r requirements.txt
+# General
+adafruit-blinka
 
 # LoRa Module
 adafruit-circuitpython-ssd1306

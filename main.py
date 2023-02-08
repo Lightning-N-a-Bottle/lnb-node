@@ -1,6 +1,7 @@
 """ main.py
 Main Module
 
+Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 
 - Documentation Notes:
@@ -14,7 +15,6 @@ import logging
 import signal
 import sys
 import threading
-import time
 
 import node
 from node import CORES, RPI, setname
@@ -102,7 +102,6 @@ def thread2() -> None:
             PACKET_QUEUE.append(node.collect())
             if CORES == 1:
                 END = True
-            # time.sleep(1)
         if CORES != 1:
             logging.info("Thread 2 finished.")
     except ValueError as val_err:
