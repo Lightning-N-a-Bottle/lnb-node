@@ -7,9 +7,19 @@ from .gpio import gps, lora_rx, lora_tx
 
 
 def init() -> str:
+    """ Initializes the Lora connection
+
+    This will acquire the GPS location and attempt to send it to the server
+    If successful, the server will respond with a string, which will become the reference
+    name for the local node.
+    Afterwards the GPS module should be shut down.
+
+    Args:
+        None
+    Returns:
+        None
     """
-    Initializes the Lora connection
-    """
+
     packet = gps()
     send(packet)        # Send GPS data to Raspberry Pi
     # name = receive()    # Receives new name from the Raspberry Pi FIXME: not blocking
@@ -17,30 +27,31 @@ def init() -> str:
     return name
 
 def receive() -> str:
-    """
-    Listen for incoming LoRa packets
+    """ Listen for incoming LoRa packets
+
     This should hypothetically be the default state
+
+    Args:
+        None
+    Returns:
+        pack (str): The packet received over LoRa
     """
     pack = ""           # TODO: cleanup
     while pack == "":
         pack = lora_rx()
     return pack
 
-def send(packet: str) -> int:
+def send(packet: str) -> None:
     """
     This thread will process all LoRa communications
-
-    TODO: LoRa Flowchart
-
-    TODO: Implement RX
-    TODO: Implement TX
-    TODO: Add ability to detect new packets to send
-    TODO: Add LoRa setup process
+    
+    Args:
+        packet (str): The compiled string that will be sent over LoRa
+    Returns:
+        None
+    
+    TODO: Should the return type be none, or should it wait for confirmation?
     """
-    fmt_lora = "%(asctime)s | LoRa\t\t: %(message)s"
-    logging.basicConfig(format=fmt_lora, level=logging.INFO,
-                        datefmt="%H:%M:%S")
-
     # Debug packet
     if "PACK:" in packet:
         logging.info("\t__name__=%s\t|\tpacket=%s\n", __name__, packet)
@@ -49,6 +60,3 @@ def send(packet: str) -> int:
 
     # Send Packet
     lora_tx(packet)
-
-
-    return 0

@@ -27,9 +27,12 @@ def handler(signum, frame) -> None:
 
     TODO: Add more handling so that the errors can return more information
 
-    signum = number associated with interrupt
-    frame = location that the interrupt came from
-    signame = reads the name of the interrupt to the user
+    Args:
+        signum (int): number associated with interrupt
+        frame (frame): = location that the interrupt came from
+        signame (str): reads the name of the interrupt to the user
+    Returns:
+        None
     """
     signame = signal.Signals(signum).name
     logging.error("Signal handler called with signal %s (%d)", signame, signum)
@@ -56,6 +59,11 @@ def thread1() -> None:
     This method is kept simple to reduce the complexity of the main and to make testing modular.
     The loop relies on a global variable to determine when the threads should be killed.
     They have to be global because the threads are separate and asynchronous.
+
+    Args:
+        None
+    Returns:
+        None
     """
     global END
     while not END:
@@ -77,16 +85,22 @@ def thread2() -> None:
     The loop relies on a global variable to determine when the threads should be killed.
     They have to be global because the threads are separate and asynchronous.
 
+    Args:
+        None
+    Returns:
+        None
+
     NOTE:   If we run this on the pico, this will have to be run on the main thread instead due to
             only having 2 cores
     """
     try:
         global END
         while not END:
+            node.temp_check()
             PACKET_QUEUE.append(node.collect())
             if CORES == 1:
                 END = True
-            time.sleep(1)
+            # time.sleep(1)
         if CORES != 1:
             logging.info("Thread 2 finished.")
     except ValueError as val_err:
@@ -131,13 +145,11 @@ def main():
                 END = False
                 thread1()
                 END = False
-                node.temp_check()
         elif CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
             t1 = threading.Thread(target=thread2)
             t1.start()
             logging.info("Threads Launched...")
             thread1()       # This is a blocking function call, so anything after this won't run until END
-            node.temp_check()
             
             # Safely closing all threads
             t1.join()
@@ -149,8 +161,6 @@ def main():
             logging.info("Threads Launched...")
 
             while True: # Because the other threads are not blocking, this will block until CTRL+C
-                node.temp_check()
-                time.sleep(5)
                 if END:
                     break
             # Safely closing all threads
