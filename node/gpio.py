@@ -137,8 +137,8 @@ def setup() -> None:
         if LORA:
             ## Setup LoRa Radio
             global rfm9x
-            lora_cs = DigitalInOut(LORA_CS)
-            lora_rst = DigitalInOut(LORA_RST)
+            lora_cs = DigitalInOut(board.CE1)
+            lora_rst = DigitalInOut(board.D25)
             rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, 915.0)
             rfm9x.tx_power = 23
 
@@ -177,7 +177,8 @@ def lora_tx(packet:str) -> None:
     """
     if RPI:
         if LORA:    #global?
-            rfm9x.send(packet)
+            encoded_packet = packet.encode('utf-8')
+            rfm9x.send(bytearray(encoded_packet))
 
 def lora_rx() -> str:
     """ Checks for incoming LoRa packet
