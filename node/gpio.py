@@ -1,8 +1,11 @@
 """
 gpio interface
+
+Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
+GPIO Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1gpio.html
 """
 import logging
-from .constants import RPI
+from .constants import RPI, LS, RTC, GPS, LORA, FREQ
 
 ### Shared Pins
 DI = 10         # GPIO 10 or Pin 19 | LoRa DI or LS MOSI
@@ -48,8 +51,10 @@ if RPI:
     import RPi.GPIO as GPIO
     import busio
     from digitalio import DigitalInOut, Direction, Pull
+    import board
     import smbus
-    import adafruit_rfm9x
+    import adafruit_ssd1306     # OLED Module
+    import adafruit_rfm9x       # LORA Module
 
     # FROM LORAMESH EX
     # from network import LoRa
@@ -61,100 +66,176 @@ if RPI:
 
 
 def btn_event(pin) -> int:
-    """
-    Debug Button Rising Event Handlers
+    """ Debug Button Rising Event Handlers
+    
+    Args:
+        None
+    Returns:
+        None
+    
     TODO: Remove Later
     """
     logging.info("Rising Button Event on pin %d!", pin)
     return 0
 
 def ls_event(pin) -> int:
-    """
-    Lightning Sensor Interrupt Pin Rising Event Handler
+    """ Lightning Sensor Interrupt Pin Rising Event Handler
+    
+    Args:
+        None
+    Returns:
+        None
     """
     logging.info("Rising Lightning Sensor Event on pin %d!", pin)
     return 0
 
-def temp_check() -> int:
+def temp_check() -> None:
     """ Checks the current CPU Temperature from the RPi files
-        TODO: Add thresholds for different levels of warnings
-        TODO: Add a return to shutdown if too hot
+    
+    Args:
+        None
+    Returns:
+        None
+    
+    TODO: Add thresholds for different levels of warnings
+    TODO: Add a return to shutdown if too hot
     """
     if RPI:
         with open('/sys/class/thermal/thermal_zone0/temp') as f:
-            logging.info("Current CPU temp = %f", float(f.read())/1000)
+            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
     else:
-        logging.info("Temperature Check on a non-RPi")
-    return 0
+        print()
+        logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
 
-def setup():
-    """
-    Initializes RPI GPIO pins
+def setup() -> None:
+    """ Initializes RPI GPIO pins
+    
+    Args:
+        None
+    Returns:
+        None
     """
     if RPI:
         GPIO.setmode(GPIO.BCM)
-        ## GPIO.setup
-        GPIO.setup(B1, GPIO.IN)
-        GPIO.setup(B2, GPIO.IN)
-        GPIO.setup(B3, GPIO.IN)
+
+        ### Communication Protocols
+        global I2C, SPI
+        I2C = busio.I2C(board.SCL, board.SDA)       # Create the I2C interface
+        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)      # Create the SPI interface
+
         ## GPIO.output
-        lora_cs = DigitalInOut(LORA_CS)
-        lora_rst = DigitalInOut(LORA_RST)
 
         ## Event Detectors for buttons and Lightning Sensor
         GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
         GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
 
-        global SPI, rfm9x
-        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)
-        rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, 915.0)
-        rfm9x.tx_power = 23
-    return 0
+        if LORA:
+            ## Setup LoRa Radio
+            global rfm9x
+            lora_cs = DigitalInOut(LORA_CS)
+            lora_rst = DigitalInOut(LORA_RST)
+            rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, 915.0)
+            rfm9x.tx_power = 23
+
+            ## Setup OLED and attached buttons
+            # Button A
+            btnA = DigitalInOut(board.D5)
+            btnA.direction = Direction.INPUT
+            btnA.pull = Pull.UP
+
+            # Button B
+            btnB = DigitalInOut(board.D6)
+            btnB.direction = Direction.INPUT
+            btnB.pull = Pull.UP
+
+            # Button C
+            btnC = DigitalInOut(board.D12)
+            btnC.direction = Direction.INPUT
+            btnC.pull = Pull.UP
+
+            # 128x32 OLED Display
+            reset_pin = DigitalInOut(board.D4)
+            display = adafruit_ssd1306.SSD1306_I2C(128, 32, I2C, reset=reset_pin)
+            # Clear the display.
+            display.fill(0)
+            display.show()
+            width = display.width
+            height = display.height
 
 def lora_tx(packet:str) -> None:
-    """
-    Sends the packet
+    """ Sends the packet
+    
+    Args:
+        packet (str): The packet to be sent over LoRa
+    Returns:
+        None
     """
     if RPI:
-        # FIXME: COPY/PASTED MESH CODE
-        global rfm9x
-        rfm9x.send(packet)
+        if LORA:    #global?
+            rfm9x.send(packet)
 
 def lora_rx() -> str:
-    """
-    Sends the packet
+    """ Checks for incoming LoRa packet
+
+    Checks once and carrys on, any extended checking must be external
+
+    Args:
+        None
+    Returns:
+        pack (str): The packet received over LoRa
     """
     if RPI:
-        # FIXME: COPY/PASTED MESH CODE
-        global rfm9x
-        packet = rfm9x.receive()
+        if LORA:    #global?
+            packet = rfm9x.receive()
+        else:
+            packet = "disabled"
     else:
-        packet = "Receive,Example,Packet"
+        packet = "windows"
     return packet
 
-def gps():
-    """
-    Acquires and returns GPS data in NMEA form
+def gps() -> str:
+    """ Acquires and returns GPS data in NMEA form
+
+    This method should extract the Latitude and Longitude from the NMEA data.
+    We may add GPS RTC features later as well
+
+    Args:
+        None
+    Returns:
+        nmea (str): a string that combines latitude and longitude in a string ready for LoRa
+
     """
     if RPI:
         nmea = "loc"
     else:
         nmea = "gps"
+    logging.info("* GPS NMEA Data\t=\t%s", nmea)
     return f"GPS:{nmea}"
 
 def rtc() -> str:
-    """
-    Interacts with the Real Time Clock Module
+    """ Acquire current time from Real Time Clock Module
+
+    Args:
+        None
+    Returns:
+        time (str): current time
     """
     if RPI:
-        time = "1"
+        if RTC:
+            time = "2"
+        else:
+            time = "1"
     else:
         time = "rtc"
     return time
 
 def lightning() -> str:
-    """
-    Interacts with the Lightning Sensor Module
+    """ Interacts with the Lightning Sensor Module
+
+    Args:
+        None
+    Returns:
+        distance_intensity (str): a concatenated string with sensor data for the packet
 
     FIXME: TODO: Simulate this with a button input first, then add lightning sensor later
 
@@ -174,9 +255,14 @@ def lightning() -> str:
         intensity = "intensity"
     return f"{distance},{intensity}"
 
-def cleanup():
-    """ Cleanup GPIO pins before shutdown if RPi is active """
+def cleanup() -> None:
+    """ Cleanup GPIO pins before shutdown if RPi is active
+    
+    Args:
+        None
+    Returns:
+        None
+    """
     if RPI:
         logging.info("Cleaning up GPIO pins")
         GPIO.cleanup()
-    return 0

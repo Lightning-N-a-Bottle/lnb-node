@@ -1,5 +1,8 @@
-"""
+""" LoRa.py
 LoRa Thread Main
+
+Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
+LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1_lo_ra.html
 """
 import logging
 
@@ -17,33 +20,21 @@ def init() -> str:
     Args:
         None
     Returns:
-        None
+        name (str): the name received from the Server
     """
-
     packet = gps()
+
     send(packet)        # Send GPS data to Raspberry Pi
-    # name = receive()    # Receives new name from the Raspberry Pi FIXME: not blocking
-    name = "name"       # TODO: Remove Later
+    
+    name = None
+    while name is None:     # Loop until a name is given
+        name = lora_rx()    # Receives new name from the Raspberry Pi FIXME: Add a timeout if it takes too long
     return name
 
-def receive() -> str:
-    """ Listen for incoming LoRa packets
-
-    This should hypothetically be the default state
-
-    Args:
-        None
-    Returns:
-        pack (str): The packet received over LoRa
-    """
-    pack = ""           # TODO: cleanup
-    while pack == "":
-        pack = lora_rx()
-    return pack
-
 def send(packet: str) -> None:
-    """
-    This thread will process all LoRa communications
+    """ Processes Main LoRa communications with packet transfer
+
+
     
     Args:
         packet (str): The compiled string that will be sent over LoRa
@@ -53,10 +44,25 @@ def send(packet: str) -> None:
     TODO: Should the return type be none, or should it wait for confirmation?
     """
     # Debug packet
-    if "PACK:" in packet:
-        logging.info("\t__name__=%s\t|\tpacket=%s\n", __name__, packet)
-    else:
-        logging.info("* GPS NMEA Data\t=\t%s", packet)
+    # if "PACK:" in packet:
+    # logging.info("\t%s\t|\tpacket=%s\n", __name__, packet)
+    # else:
 
     # Send Packet
     lora_tx(packet)
+
+    # Confirm delivery FIXME: should this be an affirmation or an accuracy check?
+    response = None
+    while response is None:     # Loop until a response is found
+        response = lora_rx()    # Receives a confirmation of reception
+    
+    if response == "windows":
+        logging.info("\t%s\t|\tRunning in Windows Dev Mode:", __name__)
+    elif response == "disabled":
+        logging.info("\t%s\t|\tLoRa Module Disabled:", __name__)
+    else:
+        logging.info("\t%s\t|\tDelivered Successfully:", __name__)
+    logging.info("\t%s\t|\t\t%s", __name__, packet)
+
+    # else:
+        # logging.error("\t%s\t|\tResponse was different...", __name__)

@@ -1,9 +1,13 @@
-"""
+""" sensor.py
 Sensor Thread
 This file in the module will handle the packaging of sensor data
 It will be responsible for the GPIO interface with sensor equipment
+
+Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
+LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1sensor.html
 """
 import logging
+import time
 
 from .gpio import lightning, rtc
 
@@ -45,6 +49,7 @@ def collect() -> str:
 
     # Append to PACKET_QUEUE
     packet = f"STK:{NAME},{tstmp},{lng}"
-    logging.info("\t__name__=%s\t|\tpacket=%s", __name__, packet)
+    logging.info("\t%s\t|\tpacket=%s", __name__, packet)
+    time.sleep(2)
 
     return packet
