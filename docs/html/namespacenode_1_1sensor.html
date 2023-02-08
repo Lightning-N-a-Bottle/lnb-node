@@ -90,9 +90,13 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>NAME</b> = &quot;&q
 <tr class="separator:a4581b1a595219d13dcdeee4a3e3c0100"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><pre class="fragment">Sensor Thread
+<div class="textblock"><pre class="fragment"> sensor.py
+Sensor Thread
 This file in the module will handle the packaging of sensor data
 It will be responsible for the GPIO interface with sensor equipment
+
+Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
+LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1sensor.html
 </pre> </div><h2 class="groupheader">Function Documentation</h2>
 <a id="a05e4e278dcb32975e0e93e2436d8d95e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a05e4e278dcb32975e0e93e2436d8d95e">&#9670;&nbsp;</a></span>collect()</h2>
@@ -108,14 +112,14 @@ It will be responsible for the GPIO interface with sensor equipment
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">This thread will handle all communications with the sensors and create new packets
+<pre class="fragment"> Collects data from sensors and compiles it into a string
 
-TODO: Sensor Flowchart
+This thread will handle all communications with the sensors and create new packets
 
-TODO: RTC interface
-TODO: Lightning sensor interface
-TODO: Packet creating
-FIXME: Does GPS go here or with LoRa?
+Args:
+    None
+Returns:
+    packet (str): The properly formatted packet to be passed to LoRa
 </pre> 
 </div>
 </div>
@@ -135,11 +139,15 @@ FIXME: Does GPS go here or with LoRa?
       </table>
 </div><div class="memdoc">
 <pre class="fragment"> Modifies name identifier of current node
+
 The purpose for having the name is to reduce power consumption from the GPS.
 By only acquiring the GPS data on startup, the GPS can be turned off after first measurement.
 The node still must distinguish itself from other nodes, so the server will assign a name.
 
-:param name: str - name assigned to node by server
+Args:
+    name (str): name assigned to node by server
+Returns:
+    None
 </pre> 
 </div>
 </div>

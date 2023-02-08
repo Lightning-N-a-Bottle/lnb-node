@@ -79,13 +79,15 @@ $(function() {
 Functions</h2></td></tr>
 <tr class="memitem:aad1be25c1cfbb33569ab59f4f1e133d7"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#aad1be25c1cfbb33569ab59f4f1e133d7">init</a> ()</td></tr>
 <tr class="separator:aad1be25c1cfbb33569ab59f4f1e133d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33b4d4c64437e1f0956361e6ca01b50d"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#a33b4d4c64437e1f0956361e6ca01b50d">receive</a> ()</td></tr>
-<tr class="separator:a33b4d4c64437e1f0956361e6ca01b50d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad8d0a74d75fd7ce9421c43150c118f4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#aad8d0a74d75fd7ce9421c43150c118f4">send</a> (str packet)</td></tr>
-<tr class="separator:aad8d0a74d75fd7ce9421c43150c118f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0cd7f06515fca48bff4e2cc11d4f91f"><td class="memItemLeft" align="right" valign="top">None&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenode_1_1_lo_ra.html#ab0cd7f06515fca48bff4e2cc11d4f91f">send</a> (str packet)</td></tr>
+<tr class="separator:ab0cd7f06515fca48bff4e2cc11d4f91f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><pre class="fragment">LoRa Thread Main
+<div class="textblock"><pre class="fragment"> LoRa.py
+LoRa Thread Main
+
+Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
+LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1_lo_ra.html
 </pre> </div><h2 class="groupheader">Function Documentation</h2>
 <a id="aad1be25c1cfbb33569ab59f4f1e133d7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad1be25c1cfbb33569ab59f4f1e133d7">&#9670;&nbsp;</a></span>init()</h2>
@@ -101,37 +103,28 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Initializes the Lora connection
+<pre class="fragment"> Initializes the Lora connection
+
+This will acquire the GPS location and attempt to send it to the server
+If successful, the server will respond with a string, which will become the reference
+name for the local node.
+Afterwards the GPS module should be shut down.
+
+Args:
+    None
+Returns:
+    name (str): the name received from the Server
 </pre> 
 </div>
 </div>
-<a id="a33b4d4c64437e1f0956361e6ca01b50d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33b4d4c64437e1f0956361e6ca01b50d">&#9670;&nbsp;</a></span>receive()</h2>
+<a id="ab0cd7f06515fca48bff4e2cc11d4f91f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab0cd7f06515fca48bff4e2cc11d4f91f">&#9670;&nbsp;</a></span>send()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> str node.LoRa.receive </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<pre class="fragment">Listen for incoming LoRa packets
-This should hypothetically be the default state
-</pre> 
-</div>
-</div>
-<a id="aad8d0a74d75fd7ce9421c43150c118f4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad8d0a74d75fd7ce9421c43150c118f4">&#9670;&nbsp;</a></span>send()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"> int node.LoRa.send </td>
+          <td class="memname"> None node.LoRa.send </td>
           <td>(</td>
           <td class="paramtype">str&#160;</td>
           <td class="paramname"><em>packet</em></td><td>)</td>
@@ -139,14 +132,16 @@ This should hypothetically be the default state
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">This thread will process all LoRa communications
+<pre class="fragment"> Processes Main LoRa communications with packet transfer
 
-TODO: LoRa Flowchart
 
-TODO: Implement RX
-TODO: Implement TX
-TODO: Add ability to detect new packets to send
-TODO: Add LoRa setup process
+
+Args:
+    packet (str): The compiled string that will be sent over LoRa
+Returns:
+    None
+
+TODO: Should the return type be none, or should it wait for confirmation?
 </pre> 
 </div>
 </div>
