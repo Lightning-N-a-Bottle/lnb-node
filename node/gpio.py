@@ -10,6 +10,9 @@ import time
 
 from .constants import RPI, LS, RTC, GPS, LORA, FREQ
 
+### FLAGS
+LS_FLAG = False
+
 ### Shared Pins
 DI = 10         # GPIO 10 or Pin 19 | LoRa DI or LS MOSI
 DO = 9          # GPIO 9 or Pin 21  | LoRa DO or LS MISO
@@ -78,6 +81,8 @@ def btn_event(pin) -> int:
     TODO: Remove Later
     """
     logging.info("Rising Button Event on pin %d!", pin)
+    global LS_FLAG
+    LS_FLAG = True
     return 0
 
 def ls_event(pin) -> int:
@@ -89,25 +94,9 @@ def ls_event(pin) -> int:
         None
     """
     logging.info("Rising Lightning Sensor Event on pin %d!", pin)
+    global LS_FLAG
+    LS_FLAG = True
     return 0
-
-def temp_check() -> None:
-    """ Checks the current CPU Temperature from the RPi files
-    
-    Args:
-        None
-    Returns:
-        None
-    
-    TODO: Add thresholds for different levels of warnings
-    TODO: Add a return to shutdown if too hot
-    """
-    if RPI:
-        with open('/sys/class/thermal/thermal_zone0/temp') as f:
-            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
-    else:
-        print()
-        logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
 
 def setup() -> None:
     """ Initializes RPI GPIO pins
@@ -167,6 +156,24 @@ def setup() -> None:
             width = display.width
             height = display.height
 
+def temp_check() -> None:
+    """ Checks the current CPU Temperature from the RPi files
+    
+    Args:
+        None
+    Returns:
+        None
+    
+    TODO: Add thresholds for different levels of warnings
+    TODO: Add a return to shutdown if too hot
+    """
+    if RPI:
+        with open('/sys/class/thermal/thermal_zone0/temp') as f:
+            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
+    else:
+        print()
+        logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
+
 def lora_tx(packet:str) -> None:
     """ Sends the packet
     
@@ -212,7 +219,10 @@ def gps() -> str:
 
     """
     if RPI:
-        nmea = "loc"
+        if GPS:
+            nmea = "loc"
+        else:
+            nmea = "disabled"
     else:
         nmea = "gps"
     logging.info("* GPS NMEA Data\t=\t%s", nmea)
@@ -230,7 +240,7 @@ def rtc() -> str:
         if RTC:
             time = "2"
         else:
-            time = "1"
+            time = "disabled"
     else:
         time = "rtc"
     return time
@@ -264,6 +274,10 @@ def lightning() -> str:
             
             distance = "2"
             intensity = "3"
+        else:
+            time.sleep(2)
+            distance = "disabled"
+            intensity = "disabled"
     else:
         time.sleep(2)
         distance = "distance"
