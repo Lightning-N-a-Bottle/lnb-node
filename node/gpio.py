@@ -122,6 +122,9 @@ def setup() -> None:
 
         ## GPIO.output
 
+        ## Event Detectors for buttons and Lightning Sensor
+        GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
+        GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
 
         if LORA:
             ## Setup LoRa Radio
@@ -251,7 +254,7 @@ def lightning() -> str:
     Args:
         None
     Returns:
-        distance_intensity (str): a concatenated string with sensor data for the packet
+        ls_out (str): a concatenated string with sensor data for the packet
 
     FIXME: TODO: Simulate this with a button input first, then add lightning sensor later
 
@@ -263,26 +266,25 @@ def lightning() -> str:
     - MOSI: Data from microcontroller to AS3935
 
     """
+    global LS_FLAG
     if RPI:
         if LS:
-            ## Event Detectors for buttons and Lightning Sensor
-            GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
-            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
-
-            while LS_FLAG:
+            while LS_FLAG is False:
                 time.sleep(.1)
-            
             distance = "2"
             intensity = "3"
         else:
-            time.sleep(2)
+            while LS_FLAG is False:
+                time.sleep(.1)
             distance = "disabled"
             intensity = "disabled"
     else:
         time.sleep(2)
         distance = "distance"
         intensity = "intensity"
-    return f"{distance},{intensity}"
+    ls_out = f"{distance},{intensity}"
+    LS_FLAG = False
+    return ls_out
 
 def cleanup() -> None:
     """ Cleanup GPIO pins before shutdown if RPi is active

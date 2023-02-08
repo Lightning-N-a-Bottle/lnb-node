@@ -19,8 +19,8 @@ if platform.system() == "Linux" and platform.release().find('raspi'):
 ### WHAT MODULES ARE CURRENTLY CONNECTED ###
 LS = False          # Lightning Sensor
 RTC = False         # Real Time Clock
-GPS = True         # GPS Location
-LORA = False         # LoRa Radio
+GPS = False         # GPS Location
+LORA = True         # LoRa Radio
 
 ### DEV PARAMETERS ###
 FREQ = 915.0        # MHz - Frequency channel for LoRa

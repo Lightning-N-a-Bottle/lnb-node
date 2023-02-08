@@ -27,9 +27,9 @@ def init() -> str:
 
     send(packet)        # Send GPS data to Raspberry Pi
     
-    name = None
-    while name is None:     # Loop until a name is given
-        name = lora_rx()    # Receives new name from the Raspberry Pi FIXME: Add a timeout if it takes too long
+    name = "Node"
+    # while name is None:     # Loop until a name is given
+    #     name = lora_rx()    # Receives new name from the Raspberry Pi FIXME: Add a timeout if it takes too long
     return name
 
 def send(packet: str) -> None:
@@ -53,9 +53,9 @@ def send(packet: str) -> None:
     lora_tx(packet)
 
     # Confirm delivery FIXME: should this be an affirmation or an accuracy check?
-    response = None
-    while response is None:     # Loop until a response is found
-        response = lora_rx()    # Receives a confirmation of reception
+    response = "None"
+    # while response is None:     # Loop until a response is found
+    #     response = lora_rx()    # Receives a confirmation of reception
     
     if response == "windows":
         logging.info("\t%s\t|\tRunning in Windows Dev Mode:", __name__)
