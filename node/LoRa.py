@@ -63,7 +63,7 @@ def send(packet: str) -> None:
         logging.info("\t%s\t|\tLoRa Module Disabled:", __name__)
     else:
         logging.info("\t%s\t|\tDelivered Successfully:", __name__)
-    logging.info("\t%s\t|\t\t%s", __name__, packet)
+    logging.info("\t%s\t|\t%s\n", __name__, packet)
 
     # else:
         # logging.error("\t%s\t|\tResponse was different...", __name__)

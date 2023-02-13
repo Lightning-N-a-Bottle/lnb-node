@@ -13,7 +13,7 @@ from .gpio import lightning, rtc
 
 NAME = ""
 
-def setname(name: str) -> int:
+def setname(name: str) -> None:
     """ Modifies name identifier of current node
 
     The purpose for having the name is to reduce power consumption from the GPS.
