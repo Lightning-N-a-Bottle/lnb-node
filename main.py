@@ -4,9 +4,11 @@ Main Module
 Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 
-- Documentation Notes:
+Documentation Notes:
     - https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
-- TODO:
+    - https://stackoverflow.com/questions/1523427/what-is-the-common-header-format-of-python-files
+    - https://www.tutorialspoint.com/python/python_multithreading.htm
+TODO:
     - look into machine package - https://docs.micropython.org/en/latest/library/machine.html
     - sleep and wake from ls spi connection to save power
     - 
@@ -44,9 +46,6 @@ def handler(signum, frame) -> None:
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
         logging.info("User manually initiated shutdown using \"CTRL+C\"...")
-        if RPI:
-            logging.info("Cleaning up GPIO Pins...")
-            node.gpio.cleanup()
         if CORES > 1:
             global END
             END = True
@@ -168,6 +167,9 @@ def main():
             # Safely closing all threads
             t1.join()
             t2.join()
+        # System Settings
+        if RPI:
+            node.gpio.cleanup()
         logging.info("All Threads finished...exiting")
     except ValueError as val_err:       # TODO: Handle other error types better
         return str(val_err)
