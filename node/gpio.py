@@ -131,7 +131,7 @@ def setup() -> None:
             global rfm9x
             lora_cs = DigitalInOut(board.CE1)
             lora_rst = DigitalInOut(board.D25)
-            rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, 915.0)
+            rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, FREQ)
             rfm9x.tx_power = 23
 
             ## Setup OLED and attached buttons
@@ -171,7 +171,7 @@ def temp_check() -> None:
     TODO: Add a return to shutdown if too hot
     """
     if RPI:
-        with open('/sys/class/thermal/thermal_zone0/temp') as f:
+        with open(file='/sys/class/thermal/thermal_zone0/temp', encoding='utf8') as f:
             logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
     else:
         print()
@@ -186,7 +186,7 @@ def lora_tx(packet:str) -> None:
         None
     """
     if RPI:
-        if LORA:    #global?
+        if LORA:
             encoded_packet = packet.encode('utf-8')
             rfm9x.send(bytearray(encoded_packet))
 
