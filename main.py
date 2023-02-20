@@ -20,7 +20,6 @@ import threading
 import time
 
 import node
-from node import CORES, RPI, setname
 
 END = False         # Global Variable that kills threads
 PACKET_QUEUE = []   # Sensor thread indicates when a package is ready
@@ -46,7 +45,7 @@ def handler(signum, frame) -> None:
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
         logging.info("User manually initiated shutdown using \"CTRL+C\"...")
-        if CORES > 1:
+        if node.CORES > 1:
             global END
             END = True
         else:
@@ -72,10 +71,10 @@ def thread1() -> None:
         # global PACKET_QUEUE
         if len(PACKET_QUEUE) > 0:
             node.send(PACKET_QUEUE.pop(0))
-        elif CORES == 1:
+        elif node.CORES == 1:
             END = True
         time.sleep(1)
-    if CORES != 1:
+    if node.CORES != 1:
         logging.info("Thread 1 finished.")
     # logging.error("ISSUE WITH LORA!")
     END = True
@@ -100,9 +99,9 @@ def thread2() -> None:
         while not END:
             node.temp_check()
             PACKET_QUEUE.append(node.collect())
-            if CORES == 1:
+            if node.CORES == 1:
                 END = True
-        if CORES != 1:
+        if node.CORES != 1:
             logging.info("Thread 2 finished.")
     except ValueError as val_err:
         logging.error("ISSUE WITH SENSORS! %s", val_err)
@@ -120,7 +119,7 @@ def main():
                         datefmt="%Y-%m-%D %H:%M:%S")
     
     # System Settings
-    if RPI:
+    if node.RPI:
         logging.info("* GPIO ENABLED...")
         node.gpio.setup()
     else:
@@ -130,23 +129,23 @@ def main():
     name = node.init()
     node.setname(name)
 
-    logging.info("* Starting up device with %d Cores...", CORES)
+    logging.info("* Starting up device with %d Cores...", node.CORES)
 
     # Initialize Listener (for CTRL+C interrupts)
     signal.signal(signal.SIGINT, handler)
 
     try:
         # Setting up Threads based on core count
-        if CORES <= 0:
+        if node.CORES <= 0:
             logging.error("CORE COUNT MUST BE A POSITIVE INTEGER")
-        elif CORES == 1:
+        elif node.CORES == 1:
             while True:
                 global END
                 thread2()
                 END = False
                 thread1()
                 END = False
-        elif CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
+        elif node.CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
             t1 = threading.Thread(target=thread2)
             t1.start()
             logging.info("Threads Launched...")
@@ -168,7 +167,7 @@ def main():
             t1.join()
             t2.join()
         # System Settings
-        if RPI:
+        if node.RPI:
             node.gpio.cleanup()
         logging.info("All Threads finished...exiting")
     except ValueError as val_err:       # TODO: Handle other error types better
