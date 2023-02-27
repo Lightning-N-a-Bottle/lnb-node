@@ -1,7 +1,7 @@
 import as3935
 import pigpio
 
-irq_pin_number = 13    # BCM number (code after GPIO)
+irq_pin_number = 0    # BCM number (code after GPIO)
 bus = 1               # On newer Raspberrys is 1
 address = 0x03        # If using MOD-1016 this is the address
 
@@ -27,8 +27,10 @@ def irq_callback(gpio, level, tick):
 
 try:
     cb = sensor.pi.callback(irq_pin_number, pigpio.RISING_EDGE, irq_callback)
+    print("Ready...")
     while True:
         pass
 finally:
+    print("Finished!")
     cb.cancel()
     sensor.pi.stop()

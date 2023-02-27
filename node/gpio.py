@@ -131,7 +131,7 @@ def setup() -> None:
             global rfm9x
             lora_cs = DigitalInOut(board.CE1)
             lora_rst = DigitalInOut(board.D25)
-            rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, 915.0)
+            rfm9x = adafruit_rfm9x.RFM9x(SPI, lora_cs, lora_rst, FREQ)
             rfm9x.tx_power = 23
 
             ## Setup OLED and attached buttons
