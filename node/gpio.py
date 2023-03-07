@@ -174,7 +174,6 @@ def temp_check() -> None:
         with open(file='/sys/class/thermal/thermal_zone0/temp', encoding='utf8') as f:
             logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
     else:
-        print()
         logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
 
 def lora_tx(packet:str) -> None:

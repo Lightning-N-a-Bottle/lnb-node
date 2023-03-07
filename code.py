@@ -115,7 +115,7 @@ def main():
     """
     # Initial Logger Settings
     fmt_main = "%(asctime)s | code\t\t: %(message)s"
-    logging.basicConfig(format=fmt_main, level=logging.INFO,
+    logging.basicConfig(filename="./logs/debugout.log", encoding="utf-8", format=fmt_main, level=logging.INFO,
                         datefmt="%Y-%m-%D %H:%M:%S")
     
     # System Settings
