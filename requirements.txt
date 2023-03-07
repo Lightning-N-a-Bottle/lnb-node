@@ -8,4 +8,4 @@ adafruit-circuitpython-framebuf
 adafruit-circuitpython-rfm9x
 
 # Lightning Sensor
-# as3935-0.1.4
+sparkfun-circuitpython-qwiicas3935

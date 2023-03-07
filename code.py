@@ -1,4 +1,4 @@
-""" main.py
+""" code.py
 Main Module
 
 Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
@@ -114,7 +114,7 @@ def main():
     This will handle the two different threads
     """
     # Initial Logger Settings
-    fmt_main = "%(asctime)s | main\t\t: %(message)s"
+    fmt_main = "%(asctime)s | code\t\t: %(message)s"
     logging.basicConfig(format=fmt_main, level=logging.INFO,
                         datefmt="%Y-%m-%D %H:%M:%S")
     
