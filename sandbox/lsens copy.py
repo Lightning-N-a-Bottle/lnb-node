@@ -13,7 +13,7 @@ sensor = as3935.AS3935(irq_pin_number, bus, address)
 
 # We need to calibrate the sensor first. Use the tuning cap provided
 # or calculate it using sensor.calculate_tuning_cap(*args)
-print(sensor.calculate_tuning_cap())
+# print(sensor.calculate_tuning_cap())
 sensor.full_calibration(12)
 
 sensor.set_indoors(True)
@@ -27,7 +27,7 @@ def handler(signum, frame) -> None:
 
 # Every time you sense a pulse on IRQ it means there is an
 # interruption request. You can read it like this:
-def irq_callback(gpio, level, tick):
+def irq_callback(gpio):
     interruption = sensor.get_interrupt()
     if interruption == as3935.INT_NH:
         print("Noise floor too high")
