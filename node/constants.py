@@ -8,8 +8,11 @@ Constants Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/nam
 import os
 import platform
 
+PICO = False        # Running on PICO
+
 ### IDENTIFY SYSTEM CORE COUNT ###
-CORES = 2#os.cpu_count()
+CORES = os.cpu_count()
+CORES = 2
 
 ### IDENTIFY SYSTEM OS/GPIO CAPABILITY ###
 RPI = False
@@ -23,4 +26,5 @@ GPS = False         # GPS Location
 LORA = True         # LoRa Radio
 
 ### DEV PARAMETERS ###
+OUTFILE = True      # Set True to print to file, False to console
 FREQ = 915.0        # MHz - Frequency channel for LoRa

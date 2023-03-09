@@ -68,6 +68,8 @@ if RPI:
     # import ubinascii
     # import py_com
     # from loramesh import Loramesh
+else:
+    import keyboard
 
 
 def btn_event(pin) -> int:
@@ -80,7 +82,7 @@ def btn_event(pin) -> int:
     
     TODO: Remove Later
     """
-    logging.info("Rising Button Event on pin %d!", pin)
+    logging.info("\t%s\t|\tRising Button Event on pin %d!", __name__, pin)
     global LS_FLAG
     LS_FLAG = True
     return 0
@@ -93,7 +95,7 @@ def ls_event(pin) -> int:
     Returns:
         None
     """
-    logging.info("Rising Lightning Sensor Event on pin %d!", pin)
+    logging.info("\t%s\t|\tRising Lightning Sensor Event on pin %d!", __name__, pin)
     global LS_FLAG
     LS_FLAG = True
     return 0
@@ -172,7 +174,7 @@ def temp_check() -> None:
     """
     if RPI:
         with open(file='/sys/class/thermal/thermal_zone0/temp', encoding='utf8') as f:
-            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
+            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, __name__, float(f.read())/1000)
     else:
         logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
 
@@ -227,7 +229,7 @@ def gps() -> str:
             nmea = "disabled"
     else:
         nmea = "gps"
-    logging.info("* GPS NMEA Data\t=\t%s", nmea)
+    logging.info("\t%s\t|\t* GPS NMEA Data = %s", __name__, nmea)
     return f"GPS:{nmea}"
 
 def rtc() -> str:
@@ -278,9 +280,13 @@ def lightning() -> str:
             distance = "disabled"
             intensity = "disabled"
     else:
+        # This allows us to simulate the strike with a keypress on a non rpi device
+        # keyboard.wait("c")
         time.sleep(2)
+        # Mock Data
         distance = "distance"
         intensity = "intensity"
+        
     ls_out = f"{distance},{intensity}"
     LS_FLAG = False
     return ls_out
@@ -294,5 +300,5 @@ def cleanup() -> None:
         None
     """
     if RPI:
-        logging.info("Cleaning up GPIO pins")
+        logging.info("\t%s\t|\tCleaning up GPIO pins", __name__)
         GPIO.cleanup()

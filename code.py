@@ -18,6 +18,7 @@ import signal
 import sys
 import threading
 import time
+import datetime
 
 import node
 
@@ -39,12 +40,12 @@ def handler(signum, frame) -> None:
         None
     """
     signame = signal.Signals(signum).name
-    logging.error("Signal handler called with signal %s (%d)", signame, signum)
-    logging.info("Frame = %s", frame)
+    logging.error("\t%s\t|\tSignal handler called with signal %s (%d)", __name__, signame, signum)
+    logging.info("\t%s\t|\tFrame = %s", __name__, frame)
 
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
-        logging.info("User manually initiated shutdown using \"CTRL+C\"...")
+        logging.info("\t%s\t|\tUser manually initiated shutdown using \"CTRL+C\"...", __name__)
         if node.CORES > 1:
             global END
             END = True
@@ -53,33 +54,7 @@ def handler(signum, frame) -> None:
 
     # TODO: Handles a memory access conflict from two threads overlapping
 
-
-def thread1() -> None:
-    """First Thread of the program, calls the "run" function of the LoRa Module.
-
-    This method is kept simple to reduce the complexity of the main and to make testing modular.
-    The loop relies on a global variable to determine when the threads should be killed.
-    They have to be global because the threads are separate and asynchronous.
-
-    Args:
-        None
-    Returns:
-        None
-    """
-    global END
-    while not END:
-        # global PACKET_QUEUE
-        if len(PACKET_QUEUE) > 0:
-            node.send(PACKET_QUEUE.pop(0))
-        elif node.CORES == 1:
-            END = True
-        time.sleep(1)
-    if node.CORES != 1:
-        logging.info("Thread 1 finished.")
-    # logging.error("ISSUE WITH LORA!")
-    END = True
-
-def thread2() -> None:
+def sens_thread() -> None:
     """Second Thread of the program, calls the "run" function of the Sensor Module.
 
     This method is kept simple to reduce the complexity of the main and to make testing modular.
@@ -102,10 +77,35 @@ def thread2() -> None:
             if node.CORES == 1:
                 END = True
         if node.CORES != 1:
-            logging.info("Thread 2 finished.")
+            logging.info("\t%s\t|\tThread 2 finished.", __name__)
     except ValueError as val_err:
-        logging.error("ISSUE WITH SENSORS! %s", val_err)
+        logging.error("\t%s\t|\tISSUE WITH SENSORS! %s", __name__, val_err)
         END = True
+
+def lora_thread() -> None:
+    """First Thread of the program, calls the "run" function of the LoRa Module.
+
+    This method is kept simple to reduce the complexity of the main and to make testing modular.
+    The loop relies on a global variable to determine when the threads should be killed.
+    They have to be global because the threads are separate and asynchronous.
+
+    Args:
+        None
+    Returns:
+        None
+    """
+    global END
+    while not END:
+        # global PACKET_QUEUE
+        if len(PACKET_QUEUE) > 0:
+            node.send(PACKET_QUEUE.pop(0))
+        elif node.CORES == 1:
+            END = True
+        time.sleep(1)
+    if node.CORES != 1:
+        logging.info("\t%s\t|\tThread 1 finished.", __name__)
+    # logging.error("\t%s\t|\tISSUE WITH LORA!", __name__)
+    END = True
 
 def main():
     """
@@ -114,22 +114,46 @@ def main():
     This will handle the two different threads
     """
     # Initial Logger Settings
-    fmt_main = "%(asctime)s | code\t\t: %(message)s"
-    logging.basicConfig(filename="./logs/debugout.log", encoding="utf-8", format=fmt_main, level=logging.INFO,
-                        datefmt="%Y-%m-%D %H:%M:%S")
+    fmt_main = "%(asctime)s | %(message)s"
+    filename = datetime.datetime.now().strftime("./logs/debug_%Y-%m-%d_%H-%M-%S.log")
+
+    # logger = logging.getLogger(__name__)
     
+    # # Create handlers
+    # c_handler = logging.StreamHandler()
+    # f_handler = logging.FileHandler(filename)
+    # c_handler.setLevel(logging.INFO)
+    # f_handler.setLevel(logging.INFO)
+
+    # # Create formatters and add it to handlers
+    # c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    # f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # c_handler.setFormatter(c_format)
+    # f_handler.setFormatter(f_format)
+
+    # # Add handlers to the logger
+    # logger.addHandler(c_handler)
+    # logger.addHandler(f_handler)
+    if node.OUTFILE:
+        logging.basicConfig(filename=filename, format=fmt_main,
+                        level=logging.INFO, datefmt="%Y-%m-%d %H:%M:%S")
+    else:
+        logging.basicConfig(format=fmt_main, level=logging.INFO,
+                    datefmt="%Y-%m-%d %H:%M:%S")
+
+
     # System Settings
     if node.RPI:
-        logging.info("* GPIO ENABLED...")
+        logging.info("\t%s\t|\t* GPIO ENABLED...", __name__)
         node.gpio.setup()
     else:
-        logging.info("* GPIO DISABLED...")
+        logging.info("\t%s\t|\t* GPIO DISABLED...", __name__)
 
     # Initial LoRa exchange
     name = node.init()
     node.setname(name)
 
-    logging.info("* Starting up device with %d Cores...", node.CORES)
+    logging.info("\t%s\t|\t* Starting up device with %d Cores...", __name__, node.CORES)
 
     # Initialize Listener (for CTRL+C interrupts)
     signal.signal(signal.SIGINT, handler)
@@ -137,28 +161,28 @@ def main():
     try:
         # Setting up Threads based on core count
         if node.CORES <= 0:
-            logging.error("CORE COUNT MUST BE A POSITIVE INTEGER")
+            logging.error("\t%s\t|\tCORE COUNT MUST BE A POSITIVE INTEGER", __name__)
         elif node.CORES == 1:
             while True:
                 global END
-                thread2()
+                sens_thread()
                 END = False
-                thread1()
+                lora_thread()
                 END = False
         elif node.CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
-            t1 = threading.Thread(target=thread2)
+            t1 = threading.Thread(target=sens_thread)
             t1.start()
-            logging.info("Threads Launched...")
-            thread1()       # This is a blocking function call, so anything after this won't run until END
+            logging.info("\t%s\t|\tThreads Launched...\n", __name__)
+            lora_thread()       # This is a blocking function call, so anything after this won't run until END
             
             # Safely closing all threads
             t1.join()
         else:
-            t1 = threading.Thread(target=thread1)
-            t2 = threading.Thread(target=thread2)
+            t1 = threading.Thread(target=lora_thread)
+            t2 = threading.Thread(target=sens_thread)
             t1.start()
             t2.start()
-            logging.info("Threads Launched...")
+            logging.info("\t%s\t|\tThreads Launched...\n", __name__)
 
             while True: # Because the other threads are not blocking, this will block until CTRL+C
                 if END:
@@ -169,7 +193,7 @@ def main():
         # System Settings
         if node.RPI:
             node.gpio.cleanup()
-        logging.info("All Threads finished...exiting")
+        logging.info("\t%s\t|\tAll Threads finished...exiting", __name__)
     except ValueError as val_err:       # TODO: Handle other error types better
         return str(val_err)
 

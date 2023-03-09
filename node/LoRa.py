@@ -58,12 +58,11 @@ def send(packet: str) -> None:
     #     response = lora_rx()    # Receives a confirmation of reception
     
     if response == "windows":
-        logging.info("\t%s\t|\tRunning in Windows Dev Mode:", __name__)
+        logging.info("\t%s\t|\tRunning in Windows Dev Mode: %s", __name__, packet)
     elif response == "disabled":
-        logging.info("\t%s\t|\tLoRa Module Disabled:", __name__)
+        logging.info("\t%s\t|\tLoRa Module Disabled: %s", __name__, packet)
     else:
-        logging.info("\t%s\t|\tDelivered Successfully:", __name__)
-    logging.info("\t%s\t|\t%s\n", __name__, packet)
+        logging.info("\t%s\t|\tDELIVERED=%s\n", __name__, packet)
 
     # else:
         # logging.error("\t%s\t|\tResponse was different...", __name__)

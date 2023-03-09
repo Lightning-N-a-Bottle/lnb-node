@@ -28,7 +28,7 @@ def setname(name: str) -> None:
     # Global
     global NAME
     NAME = name
-    logging.info("* This Node is now named:\t%s", NAME)
+    logging.info("\t%s\t|\t* This Node is now named:\t%s", __name__, NAME)
 
 
 def collect() -> str:
@@ -42,13 +42,13 @@ def collect() -> str:
         packet (str): The properly formatted packet to be passed to LoRa
     """
     # When lightning is detected, this will populate the string with the sensor data
-    lng = lightning()       # Acquire Lightning Distance/Intensity
+    lng: str = lightning()       # Acquire Lightning Distance/Intensity
 
     # Acquire RTC Timestamp
-    tstmp = rtc()
+    tstmp: str = rtc()
 
     # Append to PACKET_QUEUE
-    packet = f"STK:{NAME},{tstmp},{lng}"
-    logging.info("\t%s\t|\tpacket=%s", __name__, packet)
+    packet: str = f"STK:{NAME},{tstmp},{lng}"
+    logging.info("\t%s\t|\tCREATED=%s", __name__, packet)
 
     return packet
