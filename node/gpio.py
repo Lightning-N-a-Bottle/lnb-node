@@ -174,7 +174,7 @@ def temp_check() -> None:
     """
     if RPI:
         with open(file='/sys/class/thermal/thermal_zone0/temp', encoding='utf8') as f:
-            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, __name__, float(f.read())/1000)
+            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
     else:
         logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
 

@@ -26,5 +26,5 @@ GPS = False         # GPS Location
 LORA = True         # LoRa Radio
 
 ### DEV PARAMETERS ###
-OUTFILE = True      # Set True to print to file, False to console
+OUTFILE = False     # Set True to print to file, False to console
 FREQ = 915.0        # MHz - Frequency channel for LoRa
