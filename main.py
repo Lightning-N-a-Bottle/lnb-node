@@ -13,7 +13,6 @@ TODO:
     - sleep and wake from ls spi connection to save power
     - 
 """
-import logging
 import signal
 import sys
 import threading
@@ -21,6 +20,8 @@ import time
 import datetime
 
 import node
+if not node.RPI:
+    import logging
 
 END = False         # Global Variable that kills threads
 PACKET_QUEUE = []   # Sensor thread indicates when a package is ready
@@ -40,12 +41,19 @@ def handler(signum, frame) -> None:
         None
     """
     signame = signal.Signals(signum).name
-    logging.error("\t%s\t|\tSignal handler called with signal %s (%d)", __name__, signame, signum)
-    logging.info("\t%s\t|\tFrame = %s", __name__, frame)
+    if node.RPI:
+        print(f"\t{__name__}\t|\tSignal handler called with signal {signame} ({signum})")
+        print(f"\t{__name__}\t|\tFrame = {frame}")
+    else:
+        logging.error("\t%s\t|\tSignal handler called with signal %s (%d)", __name__, signame, signum)
+        logging.info("\t%s\t|\tFrame = %s", __name__, frame)
 
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
-        logging.info("\t%s\t|\tUser manually initiated shutdown using \"CTRL+C\"...", __name__)
+        if node.RPI:
+            print(f"\t{__name__}\t|\tUser manually initiated shutdown using \"CTRL+C\"...")
+        else:
+            logging.info("\t%s\t|\tUser manually initiated shutdown using \"CTRL+C\"...", __name__)
         if node.CORES > 1:
             global END
             END = True
@@ -77,9 +85,16 @@ def sens_thread() -> None:
             if node.CORES == 1:
                 END = True
         if node.CORES != 1:
-            logging.info("\t%s\t|\tThread 2 finished.", __name__)
+            if node.RPI:
+                print(f"\t{__name__}\t|\tThread 2 finished.")
+            else:
+                logging.info("\t%s\t|\tThread 2 finished.", __name__)
+
     except ValueError as val_err:
-        logging.error("\t%s\t|\tISSUE WITH SENSORS! %s", __name__, val_err)
+        if node.RPI:
+            print(f"{__name__}\t|\tISSUE WITH SENSORS! {val_err}")
+        else:
+            logging.error("\t%s\t|\tISSUE WITH SENSORS! %s", __name__, val_err)
         END = True
 
 def lora_thread() -> None:
@@ -103,8 +118,10 @@ def lora_thread() -> None:
             END = True
         time.sleep(1)
     if node.CORES != 1:
-        logging.info("\t%s\t|\tThread 1 finished.", __name__)
-    # logging.error("\t%s\t|\tISSUE WITH LORA!", __name__)
+        if node.RPI:
+            print(f"\t{__name__}\t|\tThread 1 finished.")
+        else:
+            logging.info("\t%s\t|\tThread 1 finished.", __name__)
     END = True
 
 def main():
@@ -113,47 +130,33 @@ def main():
 
     This will handle the two different threads
     """
-    # Initial Logger Settings
-    fmt_main = "%(asctime)s | %(message)s"
-    filename = datetime.datetime.now().strftime("./logs/debug_%Y-%m-%d_%H-%M-%S.log")
-
-    # logger = logging.getLogger(__name__)
-    
-    # # Create handlers
-    # c_handler = logging.StreamHandler()
-    # f_handler = logging.FileHandler(filename)
-    # c_handler.setLevel(logging.INFO)
-    # f_handler.setLevel(logging.INFO)
-
-    # # Create formatters and add it to handlers
-    # c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-    # f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # c_handler.setFormatter(c_format)
-    # f_handler.setFormatter(f_format)
-
-    # # Add handlers to the logger
-    # logger.addHandler(c_handler)
-    # logger.addHandler(f_handler)
-    if node.OUTFILE:
-        logging.basicConfig(filename=filename, format=fmt_main,
-                        level=logging.INFO, datefmt="%Y-%m-%d %H:%M:%S")
-    else:
-        logging.basicConfig(format=fmt_main, level=logging.INFO,
-                    datefmt="%Y-%m-%d %H:%M:%S")
+    if not node.RPI:
+        # Initial Logger Settings
+        fmt_main = "%(asctime)s | %(message)s"
+        filename = datetime.datetime.now().strftime("./logs/debug_%Y-%m-%d_%H-%M-%S.log")
+        if node.OUTFILE:
+            logging.basicConfig(filename=filename, format=fmt_main,
+                            level=logging.INFO, datefmt="%Y-%m-%d %H:%M:%S")
+        else:
+            logging.basicConfig(format=fmt_main, level=logging.INFO,
+                        datefmt="%Y-%m-%d %H:%M:%S")
 
 
     # System Settings
     if node.RPI:
-        logging.info("\t%s\t|\t* GPIO ENABLED...", __name__)
+        print(f"{__name__}\t|\t* GPIO ENABLED...")
         node.gpio.setup()
     else:
         logging.info("\t%s\t|\t* GPIO DISABLED...", __name__)
 
     # Initial LoRa exchange
-    name = node.init()
-    node.setname(name)
+    # name = node.init()
+    # node.setname(name)
 
-    logging.info("\t%s\t|\t* Starting up device with %d Cores...", __name__, node.CORES)
+    if node.RPI:
+        print(f"{__name__}\t|\t* Starting up device with %d Cores...")
+    else:
+        logging.info("\t%s\t|\t* Starting up device with %d Cores...", __name__, node.CORES)
 
     # Initialize Listener (for CTRL+C interrupts)
     signal.signal(signal.SIGINT, handler)
@@ -172,7 +175,10 @@ def main():
         elif node.CORES == 2:    # TODO: Test whether this actually uses two cores, or if the handler uses a third
             t1 = threading.Thread(target=sens_thread)
             t1.start()
-            logging.info("\t%s\t|\tThreads Launched...\n", __name__)
+            if node.RPI:
+                print(f"{__name__}\t|\tThreads Launched...\n")
+            else:
+                logging.info("\t%s\t|\tThreads Launched...\n", __name__)
             lora_thread()       # This is a blocking function call until END is set True
 
             # Safely closing all threads
@@ -193,7 +199,10 @@ def main():
         # System Settings
         if node.RPI:
             node.gpio.cleanup()
-        logging.info("\t%s\t|\tAll Threads finished...exiting", __name__)
+        if node.RPI:
+            print(f"{__name__}\t|\tAll Threads finished...exiting")
+        else:
+            logging.info("\t%s\t|\tAll Threads finished...exiting", __name__)
     except ValueError as val_err:       # TODO: Handle other error types better
         return str(val_err)
 

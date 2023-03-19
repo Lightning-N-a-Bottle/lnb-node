@@ -7,9 +7,11 @@ Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1sensor.html
 """
-import logging
-
 from .gpio import lightning, rtc
+from .constants import MPY
+
+if not MPY:
+    import logging
 
 NAME = ""
 
@@ -28,7 +30,10 @@ def setname(name: str) -> None:
     # Global
     global NAME
     NAME = name
-    logging.info("\t%s\t|\t* This Node is now named:\t%s", __name__, NAME)
+    if MPY:
+        print(f"{__name__}\t|\tThis Node is now named:\t{NAME}")
+    else:
+        logging.info("\t%s\t|\t* This Node is now named:\t%s", __name__, NAME)
 
 
 def collect() -> str:
@@ -49,6 +54,9 @@ def collect() -> str:
 
     # Append to PACKET_QUEUE
     packet: str = f"STK:{NAME},{tstmp},{lng}"
-    logging.info("\t%s\t|\tCREATED=%s", __name__, packet)
+    if MPY:
+        print(f"{__name__}\t|\tCREATED={packet}")
+    else:
+        logging.info("\t%s\t|\tCREATED=%s", __name__, packet)
 
     return packet

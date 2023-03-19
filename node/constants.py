@@ -6,18 +6,22 @@ Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.ht
 Constants Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1constants.html
 """
 import os
-import platform
-
-PICO = False        # Running on PICO
-
-### IDENTIFY SYSTEM CORE COUNT ###
-CORES = os.cpu_count()
+MPY = False         # Running MicroPython
 CORES = 2
-
-### IDENTIFY SYSTEM OS/GPIO CAPABILITY ###
 RPI = False
-if platform.system() == "Linux" and platform.release().find('raspi'):
+try:
+    if os.uname().sysname == "rp2040":
+        print("Running on a Pico!")
+    MPY = True
     RPI = True
+except AttributeError:
+    import platform
+    ### IDENTIFY SYSTEM CORE COUNT ###
+    # CORES = os.cpu_count()
+
+    ### IDENTIFY SYSTEM OS/GPIO CAPABILITY ###
+    if platform.system() == "Linux" and platform.release().find('raspi'):
+        RPI = True
 
 ### WHAT MODULES ARE CURRENTLY CONNECTED ###
 LS = False          # Lightning Sensor
