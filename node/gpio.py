@@ -5,10 +5,12 @@ Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 GPIO Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1gpio.html
 """
-import logging
 import time
 
-from .constants import RPI, LS, RTC, GPS, LORA, FREQ
+from .constants import RPI, MPY, LS, GPS, LORA, FREQ
+
+if not MPY:
+    import logging
 
 ### FLAGS
 LS_FLAG = False
@@ -26,24 +28,6 @@ LORA_RST = 25   # GPIO 25 or Pin 22 | arbitrary - reset
 LS_CS = 8       # GPIO 8 or Pin 24  | arbitrary - control select
 LS_IRQ = 13     # GPIO 13 or Pin 33 | arbitrary - interrupt
 
-### GPS - UART
-GPS_TX = 14     # GPIO 14 or Pin 8  | TX
-GPS_RX = 15     # GPIO 15 or Pin 10 | RX
-GPS_1PPS = 17   # GPIO 17 or Pin 11 | 1 Pulse Per second on GPS RTC
-GPS_RTC = 18    # GPIO 18 or Pin 12 | RTC
-GPS_3D = 27     # GPIO 27 or Pin 13 | TODO: What does this do?
-GPS_RST = 4     # GPIO 4 or Pin 7   | arbitrary - RST
-
-### RTC - I2C
-RTC_SDA = 0     # GPIO 0 or Pin 27  | arbitrary? - SDA
-RTC_SCL = 1     # GPIO 1 or Pin 28  | arbitrary? - SCL
-RTC_SQW = 26    # GPIO 26 or Pin 37 | arbitrary? - Square Wave
-RTC_RST = 19    # GPIO 19 or Pin 35 | arbitrary - reset
-
-### OLED - I2C
-OLED_SDA = 2    # GPIO 2 or Pin 3   | arbitrary? - SDA
-OLED_SCL = 3    # GPIO 3 or Pin 5   | arbitrary? - SCL
-
 ### Misc pins
 B1 = 5          # GPIO 5 or Pin 29  |
 B2 = 6          # GPIO 6 or Pin 12  |
@@ -58,34 +42,9 @@ if RPI:
     import busio
     from digitalio import DigitalInOut, Direction, Pull
     import board
-    import smbus
-    import adafruit_ssd1306     # OLED Module
-    import adafruit_rfm9x       # LORA Module
+# else:
+#     import keyboard
 
-    # FROM LORAMESH EX
-    # from network import LoRa
-    # import socket
-    # import ubinascii
-    # import py_com
-    # from loramesh import Loramesh
-else:
-    import keyboard
-
-
-def btn_event(pin) -> int:
-    """ Debug Button Rising Event Handlers
-    
-    Args:
-        None
-    Returns:
-        None
-    
-    TODO: Remove Later
-    """
-    logging.info("\t%s\t|\tRising Button Event on pin %d!", __name__, pin)
-    global LS_FLAG
-    LS_FLAG = True
-    return 0
 
 def ls_event(pin) -> int:
     """ Lightning Sensor Interrupt Pin Rising Event Handler
@@ -95,7 +54,10 @@ def ls_event(pin) -> int:
     Returns:
         None
     """
-    logging.info("\t%s\t|\tRising Lightning Sensor Event on pin %d!", __name__, pin)
+    if MPY:
+        print("Rising Lightning Event!")
+    else:
+        logging.info("\t%s\t|\tRising Lightning Event on pin %d!", __name__, pin)
     global LS_FLAG
     LS_FLAG = True
     return 0
@@ -118,18 +80,72 @@ def setup() -> None:
         GPIO.setup(LS_IRQ, GPIO.IN)
 
         ### Communication Protocols
-        global I2C, SPI
-        I2C = busio.I2C(board.SCL, board.SDA)       # Create the I2C interface
-        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)      # Create the SPI interface
+        I2C1 = busio.I2C(board.GP7, board.GP6)          # Create the first I2C interface
+        I2C2 = busio.I2C(board.GP7, board.GP6)          # Create the second I2C interface
+        SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)          # Create the SPI interface
+        UART = busio.UART(tx=board.GP0, rx=board.GP1, baudrate=9600, timeout=10)
 
-        ## GPIO.output
+        ### Initialize Modules
+        if GPS:
+            import adafruit_gps             # GPS Module
+            gps_module = adafruit_gps.GPS(UART, debug=False)   # Use UART/pyserial
+            # Turn on the basic GGA and RMC info (what you typically want)
+            gps_module.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
+            # Set update rate to once a second (1hz) which is what you typically want.
+            gps_module.send_command(b"PMTK220,1000")
 
-        ## Event Detectors for buttons and Lightning Sensor
-        GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
-        GPIO.add_event_detect(B1, GPIO.RISING, callback=btn_event)
+            # Wait until the GPS obtains a fix
+            while not gps_module.has_fix:
+                print("Waiting for fix...")
+                time.sleep(1)
+
+            # Set RTC using Fix timestamp
+            # gps.timestamp_utc.tm_mon
+            # gps.timestamp_utc.tm_mday
+            # gps.timestamp_utc.tm_year
+            # gps.timestamp_utc.tm_hour
+            # gps.timestamp_utc.tm_min
+            # gps.timestamp_utc.tm_sec
+
+            # Send GPS location
+            # gps.latitude_degrees, gps.latitude_minutes
+            # gps.longitude_degrees, gps.longitude_minutes
+            # gps.fix_quality
+            # gps.satellites
+            # gps.altitude_m
+            # gps.speed_knots
+
+        if LS:
+            import sparkfun_qwiicas3935     # Lightning Module
+            # Create as3935 object
+            lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(I2C1)
+
+            # Check if connected
+            if lightning.connected:
+                print("Schmow-ZoW, Lightning Detector Ready!")
+            else:
+                print("Lightning Detector does not appear to be connected. Please check wiring.")
+                # sys.exit()
+
+            # Set Mode
+            lightning.indoor_outdoor = lightning.OUTDOOR
+            afe_mode = lightning.indoor_outdoor
+            if afe_mode == lightning.OUTDOOR:
+                print("The Lightning Detector is in the Outdoor mode.")
+            elif afe_mode == lightning.INDOOR:
+                print("The Lightning Detector is in the Indoor mode.")
+            else:
+                print("The Lightning Detector is in an Unknown mode.")
+
+            # Callibrate
+            # TODO: describe
+            lightning.noise_level = 5           # (1-7, default=2)
+            lightning.watchdog_threshold = 2    # (1-10, default=2)
+            lightning.spike_rejection = 1       # (1-11, default=2)
 
         if LORA:
             ## Setup LoRa Radio
+            import adafruit_rfm9x       # LORA Module
             global rfm9x
             lora_cs = DigitalInOut(board.CE1)
             lora_rst = DigitalInOut(board.D25)
@@ -137,6 +153,7 @@ def setup() -> None:
             rfm9x.tx_power = 23
 
             ## Setup OLED and attached buttons
+            import adafruit_ssd1306     # OLED Module
             # Button A
             btnA = DigitalInOut(board.D5)
             btnA.direction = Direction.INPUT
@@ -154,12 +171,20 @@ def setup() -> None:
 
             # 128x32 OLED Display
             reset_pin = DigitalInOut(board.D4)
-            display = adafruit_ssd1306.SSD1306_I2C(128, 32, I2C, reset=reset_pin)
+            display = adafruit_ssd1306.SSD1306_I2C(128, 32, I2C2, reset=reset_pin)
             # Clear the display.
             display.fill(0)
             display.show()
             width = display.width
             height = display.height
+
+        ## Event Detectors for buttons and Lightning Sensor
+        if LS:
+            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
+        else:
+            GPIO.add_event_detect(B1, GPIO.RISING, callback=ls_event)
+
+        # Return Name?
 
 def temp_check() -> None:
     """ Checks the current CPU Temperature from the RPi files
@@ -210,27 +235,27 @@ def lora_rx() -> str:
         packet = "windows"
     return packet
 
-def gps() -> str:
-    """ Acquires and returns GPS data in NMEA form
+# def gps() -> str:
+#     """ Acquires and returns GPS data in NMEA form
 
-    This method should extract the Latitude and Longitude from the NMEA data.
-    We may add GPS RTC features later as well
+#     This method should extract the Latitude and Longitude from the NMEA data.
+#     We may add GPS RTC features later as well
 
-    Args:
-        None
-    Returns:
-        nmea (str): a string that combines latitude and longitude in a string ready for LoRa
+#     Args:
+#         None
+#     Returns:
+#         nmea (str): a string that combines latitude and longitude in a string ready for LoRa
 
-    """
-    if RPI:
-        if GPS:
-            nmea = "loc"
-        else:
-            nmea = "disabled"
-    else:
-        nmea = "gps"
-    logging.info("\t%s\t|\t* GPS NMEA Data = %s", __name__, nmea)
-    return f"GPS:{nmea}"
+#     """
+#     if RPI:
+#         if GPS:
+#             nmea = "loc"
+#         else:
+#             nmea = "disabled"
+#     else:
+#         nmea = "gps"
+#     logging.info("\t%s\t|\t* GPS NMEA Data = %s", __name__, nmea)
+#     return f"GPS:{nmea}"
 
 def rtc() -> str:
     """ Acquire current time from Real Time Clock Module
@@ -241,10 +266,7 @@ def rtc() -> str:
         time (str): current time
     """
     if RPI:
-        if RTC:
-            time = "2"
-        else:
-            time = "disabled"
+        time = "2"
     else:
         time = "rtc"
     return time
@@ -256,8 +278,6 @@ def lightning() -> str:
         None
     Returns:
         ls_out (str): a concatenated string with sensor data for the packet
-
-    FIXME: TODO: Simulate this with a button input first, then add lightning sensor later
 
     GPIO Pins Involved:
     - CS ["Chip Select"]: Pull low to activate SPI reception
@@ -300,5 +320,8 @@ def cleanup() -> None:
         None
     """
     if RPI:
-        logging.info("\t%s\t|\tCleaning up GPIO pins", __name__)
+        if MPY:
+            print("Cleaning up GPIO pins...")
+        else:
+            logging.info("\t%s\t|\tCleaning up GPIO pins", __name__)
         GPIO.cleanup()
