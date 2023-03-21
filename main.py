@@ -199,7 +199,6 @@ def main():
         # System Settings
         if node.RPI:
             node.gpio.cleanup()
-        if node.RPI:
             print(f"{__name__}\t|\tAll Threads finished...exiting")
         else:
             logging.info("\t%s\t|\tAll Threads finished...exiting", __name__)

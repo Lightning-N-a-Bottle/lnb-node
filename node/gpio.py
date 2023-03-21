@@ -9,8 +9,17 @@ import time
 
 from .constants import RPI, MPY, LS, GPS, LORA, FREQ
 
-if not MPY:
+if RPI:
+    ### DEFINE GPIO PINS ###
+    # import RPi.GPIO as GPIO
+    import busio
+    from digitalio import DigitalInOut, Direction, Pull
+    import board
+if MPY:
+    import machine
+else:
     import logging
+    import datetime
 
 ### FLAGS
 LS_FLAG = False
@@ -35,15 +44,7 @@ B3 = 12         # GPIO 12 or Pin 32 |
 
 SPI = None
 rfm9x = None
-
-if RPI:
-    ### DEFINE GPIO PINS ###
-    import RPi.GPIO as GPIO
-    import busio
-    from digitalio import DigitalInOut, Direction, Pull
-    import board
-# else:
-#     import keyboard
+RTC = machine.RTC()
 
 
 def ls_event(pin) -> int:
@@ -71,13 +72,13 @@ def setup() -> None:
         None
     """
     if RPI:
-        GPIO.setmode(GPIO.BCM)
+        # GPIO.setmode(GPIO.BCM)
 
         ## GPIO.setup
-        GPIO.setup(B1, GPIO.IN)
-        GPIO.setup(B2, GPIO.IN)
-        GPIO.setup(B3, GPIO.IN)
-        GPIO.setup(LS_IRQ, GPIO.IN)
+        # GPIO.setup(B1, GPIO.IN)
+        # GPIO.setup(B2, GPIO.IN)
+        # GPIO.setup(B3, GPIO.IN)
+        # GPIO.setup(LS_IRQ, GPIO.IN)
 
         ### Communication Protocols
         I2C1 = busio.I2C(board.GP7, board.GP6)          # Create the first I2C interface
@@ -100,20 +101,28 @@ def setup() -> None:
                 time.sleep(1)
 
             # Set RTC using Fix timestamp
-            # gps.timestamp_utc.tm_mon
-            # gps.timestamp_utc.tm_mday
-            # gps.timestamp_utc.tm_year
-            # gps.timestamp_utc.tm_hour
-            # gps.timestamp_utc.tm_min
-            # gps.timestamp_utc.tm_sec
+            rtc.datetime((
+                gps_module.timestamp_utc.tm_year,
+                gps_module.timestamp_utc.tm_mon,
+                gps_module.timestamp_utc.tm_mday,
+                gps_module.timestamp_utc.tm_hour,
+                gps_module.timestamp_utc.tm_min,
+                gps_module.timestamp_utc.tm_sec,
+                0,
+                0,
+            ))
 
-            # Send GPS location
+            # Store GPS location
             # gps.latitude_degrees, gps.latitude_minutes
             # gps.longitude_degrees, gps.longitude_minutes
             # gps.fix_quality
             # gps.satellites
             # gps.altitude_m
             # gps.speed_knots
+            gps_packet: str = f"STK:{rtc()},{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
+
+            # Turn off GPS
+
 
         if LS:
             import sparkfun_qwiicas3935     # Lightning Module
@@ -265,10 +274,10 @@ def rtc() -> str:
     Returns:
         time (str): current time
     """
-    if RPI:
-        time = "2"
+    if MPY:
+        time = RTC.datetime()
     else:
-        time = "rtc"
+        time = datetime.datetime()
     return time
 
 def lightning() -> str:
