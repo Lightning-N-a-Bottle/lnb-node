@@ -47,7 +47,7 @@ def send(packet: str) -> None:
     """
     # Debug packet
     # if "PACK:" in packet:
-    # logging.info("\t%s\t|\tpacket=%s\n", __name__, packet)
+    # logging.info("%s\t| packet=%s\n", __name__, packet)
     # else:
 
     # Send Packet
@@ -59,14 +59,14 @@ def send(packet: str) -> None:
     #     response = lora_rx()    # Receives a confirmation of reception
     
     if response == "windows":
-        logging.info("\t%s\t|\tRunning in Windows Dev Mode: %s", __name__, packet)
+        logging.info("%s\t| Running in Windows Dev Mode: %s", __name__, packet)
     elif response == "disabled":
-        logging.info("\t%s\t|\tLoRa Module Disabled: %s", __name__, packet)
+        logging.info("%s\t| LoRa Module Disabled: %s", __name__, packet)
     else:
         if MPY:
-            print(f"{__name__}\t|\tDELIVERED={packet}")
+            print(f"{__name__}\t| DELIVERED={packet}")
         else:
-            logging.info("\t%s\t|\tDELIVERED=%s\n", __name__, packet)
+            logging.info("%s\t| DELIVERED=%s\n", __name__, packet)
 
     # else:
-        # logging.error("\t%s\t|\tResponse was different...", __name__)
+        # logging.error("%s\t| Response was different...", __name__)

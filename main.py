@@ -42,18 +42,18 @@ def handler(signum, frame) -> None:
     """
     signame = signal.Signals(signum).name
     if node.RPI:
-        print(f"\t{__name__}\t|\tSignal handler called with signal {signame} ({signum})")
-        print(f"\t{__name__}\t|\tFrame = {frame}")
+        print(f"{__name__}\t| Signal handler called with signal {signame} ({signum})")
+        print(f"{__name__}\t| Frame = {frame}")
     else:
-        logging.error("\t%s\t|\tSignal handler called with signal %s (%d)", __name__, signame, signum)
-        logging.info("\t%s\t|\tFrame = %s", __name__, frame)
+        logging.error("%s\t| Signal handler called with signal %s (%d)", __name__, signame, signum)
+        logging.info("%s\t| Frame = %s", __name__, frame)
 
     # Handles a user input Ctrl + C
     if signame == "SIGINT":
         if node.RPI:
-            print(f"\t{__name__}\t|\tUser manually initiated shutdown using \"CTRL+C\"...")
+            print(f"{__name__}\t| User manually initiated shutdown using \"CTRL+C\"...")
         else:
-            logging.info("\t%s\t|\tUser manually initiated shutdown using \"CTRL+C\"...", __name__)
+            logging.info("%s\t| User manually initiated shutdown using \"CTRL+C\"...", __name__)
         if node.CORES > 1:
             global END
             END = True
@@ -86,15 +86,15 @@ def sens_thread() -> None:
                 END = True
         if node.CORES != 1:
             if node.RPI:
-                print(f"\t{__name__}\t|\tThread 2 finished.")
+                print(f"{__name__}\t| Thread 2 finished.")
             else:
-                logging.info("\t%s\t|\tThread 2 finished.", __name__)
+                logging.info("%s\t| Thread 2 finished.", __name__)
 
     except ValueError as val_err:
         if node.RPI:
-            print(f"{__name__}\t|\tISSUE WITH SENSORS! {val_err}")
+            print(f"{__name__}\t| ISSUE WITH SENSORS! {val_err}")
         else:
-            logging.error("\t%s\t|\tISSUE WITH SENSORS! %s", __name__, val_err)
+            logging.error("%s\t| ISSUE WITH SENSORS! %s", __name__, val_err)
         END = True
 
 def lora_thread() -> None:
@@ -119,9 +119,9 @@ def lora_thread() -> None:
         time.sleep(1)
     if node.CORES != 1:
         if node.RPI:
-            print(f"\t{__name__}\t|\tThread 1 finished.")
+            print(f"{__name__}\t| Thread 1 finished.")
         else:
-            logging.info("\t%s\t|\tThread 1 finished.", __name__)
+            logging.info("%s\t| Thread 1 finished.", __name__)
     END = True
 
 def main():
@@ -132,7 +132,7 @@ def main():
     """
     if not node.RPI:
         # Initial Logger Settings
-        fmt_main = "%(asctime)s | %(message)s"
+        fmt_main = "%(asctime)s\t| %(levelname)s\t| %(message)s"
         filename = datetime.datetime.now().strftime("./logs/debug_%Y-%m-%d_%H-%M-%S.log")
         if node.OUTFILE:
             logging.basicConfig(filename=filename, format=fmt_main,
@@ -144,19 +144,19 @@ def main():
 
     # System Settings
     if node.RPI:
-        print(f"{__name__}\t|\t* GPIO ENABLED...")
+        print(f"{__name__}\t| * GPIO ENABLED...")
         node.gpio.setup()
     else:
-        logging.info("\t%s\t|\t* GPIO DISABLED...", __name__)
+        logging.info("%s\t| * GPIO DISABLED...", __name__)
 
     # Initial LoRa exchange
     # name = node.init()
     # node.setname(name)
 
     if node.RPI:
-        print(f"{__name__}\t|\t* Starting up device with %d Cores...")
+        print(f"{__name__}\t| * Starting up device with %d Cores...")
     else:
-        logging.info("\t%s\t|\t* Starting up device with %d Cores...", __name__, node.CORES)
+        logging.info("%s\t| * Starting up device with %d Cores...", __name__, node.CORES)
 
     # Initialize Listener (for CTRL+C interrupts)
     signal.signal(signal.SIGINT, handler)
@@ -164,7 +164,7 @@ def main():
     try:
         # Setting up Threads based on core count
         if node.CORES <= 0:
-            logging.error("\t%s\t|\tCORE COUNT MUST BE A POSITIVE INTEGER", __name__)
+            logging.error("%s\t| CORE COUNT MUST BE A POSITIVE INTEGER", __name__)
         elif node.CORES == 1:
             while True:
                 global END
@@ -176,9 +176,9 @@ def main():
             t1 = threading.Thread(target=sens_thread)
             t1.start()
             if node.RPI:
-                print(f"{__name__}\t|\tThreads Launched...\n")
+                print(f"{__name__}\t| Threads Launched...\n")
             else:
-                logging.info("\t%s\t|\tThreads Launched...\n", __name__)
+                logging.info("%s\t| Threads Launched...\n", __name__)
             lora_thread()       # This is a blocking function call until END is set True
 
             # Safely closing all threads
@@ -188,7 +188,7 @@ def main():
             t2 = threading.Thread(target=sens_thread)
             t1.start()
             t2.start()
-            logging.info("\t%s\t|\tThreads Launched...\n", __name__)
+            logging.info("%s\t| Threads Launched...\n", __name__)
 
             while True: # Because the other threads are not blocking, this will block until CTRL+C
                 if END:
@@ -199,9 +199,9 @@ def main():
         # System Settings
         if node.RPI:
             node.gpio.cleanup()
-            print(f"{__name__}\t|\tAll Threads finished...exiting")
+            print(f"{__name__}\t| All Threads finished...exiting")
         else:
-            logging.info("\t%s\t|\tAll Threads finished...exiting", __name__)
+            logging.info("%s\t| All Threads finished...exiting", __name__)
     except ValueError as val_err:       # TODO: Handle other error types better
         return str(val_err)
 

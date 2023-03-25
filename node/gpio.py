@@ -19,7 +19,7 @@ if MPY:
     import machine
 else:
     import logging
-    import datetime
+    from datetime import datetime
 
 ### FLAGS
 LS_FLAG = False
@@ -44,7 +44,8 @@ B3 = 12         # GPIO 12 or Pin 32 |
 
 SPI = None
 rfm9x = None
-RTC = machine.RTC()
+if MPY:
+    RTC = machine.RTC()
 
 
 def ls_event(pin) -> int:
@@ -58,7 +59,7 @@ def ls_event(pin) -> int:
     if MPY:
         print("Rising Lightning Event!")
     else:
-        logging.info("\t%s\t|\tRising Lightning Event on pin %d!", __name__, pin)
+        logging.info("%s\t| Rising Lightning Event on pin %d!", __name__, pin)
     global LS_FLAG
     LS_FLAG = True
     return 0
@@ -208,9 +209,9 @@ def temp_check() -> None:
     """
     if RPI:
         with open(file='/sys/class/thermal/thermal_zone0/temp', encoding='utf8') as f:
-            logging.info("\t%s\t|\tCurrent CPU temp = %f", __name__, float(f.read())/1000)
+            logging.info("%s\t| Current CPU temp = %f", __name__, float(f.read())/1000)
     else:
-        logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
+        logging.info("%s\t| Temperature Check on a non-RPi", __name__)
 
 def lora_tx(packet:str) -> None:
     """ Sends the packet
@@ -263,7 +264,7 @@ def lora_rx() -> str:
 #             nmea = "disabled"
 #     else:
 #         nmea = "gps"
-#     logging.info("\t%s\t|\t* GPS NMEA Data = %s", __name__, nmea)
+#     logging.info("%s\t| * GPS NMEA Data = %s", __name__, nmea)
 #     return f"GPS:{nmea}"
 
 def rtc() -> str:
@@ -277,7 +278,7 @@ def rtc() -> str:
     if MPY:
         time = RTC.datetime()
     else:
-        time = datetime.datetime()
+        time = datetime.now()
     return time
 
 def lightning() -> str:
@@ -332,5 +333,5 @@ def cleanup() -> None:
         if MPY:
             print("Cleaning up GPIO pins...")
         else:
-            logging.info("\t%s\t|\tCleaning up GPIO pins", __name__)
+            logging.info("%s\t| Cleaning up GPIO pins", __name__)
         GPIO.cleanup()
