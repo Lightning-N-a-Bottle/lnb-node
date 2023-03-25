@@ -7,7 +7,7 @@ Constants Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/nam
 """
 import os
 MPY = False         # Running MicroPython
-CORES = 2
+CORES = 1
 RPI = False
 try:
     if os.uname().sysname == "rp2040":
