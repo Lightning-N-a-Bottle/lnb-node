@@ -9,21 +9,16 @@ import time
 
 from .constants import RPI, MPY, LS, GPS, LORA, FREQ
 
-if RPI:
-    ### DEFINE GPIO PINS ###
-    # import RPi.GPIO as GPIO
-    import busio
-    from digitalio import DigitalInOut, Direction, Pull
-    import board
-if MPY:
-    import machine
-else:
-    import logging
-    import datetime
+# import RPi.GPIO as GPIO
+import busio
+from digitalio import DigitalInOut, Direction, Pull
+import board
+import machine
 
 ### FLAGS
 LS_FLAG = False
 
+### DEFINE GPIO PINS ###
 ### Shared Pins
 DI = 10         # GPIO 10 or Pin 19 | LoRa DI or LS MOSI
 DO = 9          # GPIO 9 or Pin 21  | LoRa DO or LS MISO
@@ -88,7 +83,7 @@ def setup() -> None:
 
         ### Initialize Modules
         if GPS:
-            import adafruit_gps             # GPS Module
+            import adafruit_gps                         # GPS Module
             gps_module = adafruit_gps.GPS(UART, debug=False)   # Use UART/pyserial
             # Turn on the basic GGA and RMC info (what you typically want)
             gps_module.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
@@ -212,60 +207,6 @@ def temp_check() -> None:
     else:
         logging.info("\t%s\t|\tTemperature Check on a non-RPi", __name__)
 
-def lora_tx(packet:str) -> None:
-    """ Sends the packet
-    
-    Args:
-        packet (str): The packet to be sent over LoRa
-    Returns:
-        None
-    """
-    if RPI:
-        if LORA:
-            encoded_packet = packet.encode('utf-8')
-            rfm9x.send(bytearray(encoded_packet))
-
-def lora_rx() -> str:
-    """ Checks for incoming LoRa packet
-
-    Checks once and carrys on, any extended checking must be external
-
-    Args:
-        None
-    Returns:
-        pack (str): The packet received over LoRa
-    """
-    if RPI:
-        if LORA:    #global?
-            packet = rfm9x.receive()
-        else:
-            packet = "disabled"
-    else:
-        packet = "windows"
-    return packet
-
-# def gps() -> str:
-#     """ Acquires and returns GPS data in NMEA form
-
-#     This method should extract the Latitude and Longitude from the NMEA data.
-#     We may add GPS RTC features later as well
-
-#     Args:
-#         None
-#     Returns:
-#         nmea (str): a string that combines latitude and longitude in a string ready for LoRa
-
-#     """
-#     if RPI:
-#         if GPS:
-#             nmea = "loc"
-#         else:
-#             nmea = "disabled"
-#     else:
-#         nmea = "gps"
-#     logging.info("\t%s\t|\t* GPS NMEA Data = %s", __name__, nmea)
-#     return f"GPS:{nmea}"
-
 def rtc() -> str:
     """ Acquire current time from Real Time Clock Module
 
@@ -274,10 +215,7 @@ def rtc() -> str:
     Returns:
         time (str): current time
     """
-    if MPY:
-        time = RTC.datetime()
-    else:
-        time = datetime.datetime()
+    time = RTC.datetime()
     return time
 
 def lightning() -> str:
@@ -297,27 +235,21 @@ def lightning() -> str:
 
     """
     global LS_FLAG
-    if RPI:
-        if LS:
-            while LS_FLAG is False:
-                time.sleep(.1)
-            distance = "2"
-            intensity = "3"
-        else:
-            while LS_FLAG is False:
-                time.sleep(.1)
-            distance = "disabled"
-            intensity = "disabled"
+
+    if LS:
+        while LS_FLAG is False:
+            time.sleep(.1)
+        distance = "2"
+        intensity = "3"
     else:
-        # This allows us to simulate the strike with a keypress on a non rpi device
-        # keyboard.wait("c")
-        time.sleep(2)
-        # Mock Data
-        distance = "distance"
-        intensity = "intensity"
-        
+        while LS_FLAG is False:
+            time.sleep(.1)
+        distance = "disabled"
+        intensity = "disabled"
+
     ls_out = f"{distance},{intensity}"
     LS_FLAG = False
+
     return ls_out
 
 def cleanup() -> None:
