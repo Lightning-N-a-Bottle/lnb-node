@@ -30,10 +30,7 @@ def setname(name: str) -> None:
     # Global
     global NAME
     NAME = name
-    if MPY:
-        print(f"{__name__}\t|\tThis Node is now named:\t{NAME}")
-    else:
-        logging.info("\t%s\t|\t* This Node is now named:\t%s", __name__, NAME)
+    print(f"{__name__}\t|\tThis Node is now named:\t{NAME}")
 
 
 def collect() -> str:
@@ -54,9 +51,6 @@ def collect() -> str:
 
     # Append to PACKET_QUEUE
     packet: str = f"STK:{NAME},{tstmp},{lng}"
-    if MPY:
-        print(f"{__name__}\t|\tCREATED={packet}")
-    else:
-        logging.info("\t%s\t|\tCREATED=%s", __name__, packet)
+    print(f"{__name__}\t|\tCREATED={packet}")
 
     return packet
