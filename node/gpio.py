@@ -14,6 +14,7 @@ import busio
 from digitalio import DigitalInOut, Direction, Pull
 import board
 import machine
+from machine import Pin
 
 ### FLAGS
 LS_FLAG = False
@@ -50,10 +51,7 @@ def ls_event(pin) -> int:
     Returns:
         None
     """
-    if MPY:
-        print("Rising Lightning Event!")
-    else:
-        logging.info("\t%s\t|\tRising Lightning Event on pin %d!", __name__, pin)
+    print("Rising Lightning Event!")
     global LS_FLAG
     LS_FLAG = True
     return 0
@@ -74,10 +72,13 @@ def setup() -> None:
         # GPIO.setup(B2, GPIO.IN)
         # GPIO.setup(B3, GPIO.IN)
         # GPIO.setup(LS_IRQ, GPIO.IN)
+        # P_B1 = Pin(B1, Pin.IN, Pin.PULL_UP)
+        # P_B2 = Pin(B2, Pin.IN, Pin.PULL_UP)
+        # P_B3 = Pin(B3, Pin.IN, Pin.PULL_UP)
 
         ### Communication Protocols
-        I2C1 = busio.I2C(board.GP7, board.GP6)          # Create the first I2C interface
-        I2C2 = busio.I2C(board.GP7, board.GP6)          # Create the second I2C interface
+        I2C0 = busio.I2C(board.GP7, board.GP6)          # Create the first I2C interface
+        I2C1 = busio.I2C(board.GP5, board.GP4)          # Create the second I2C interface
         SPI = busio.SPI(CLK, MOSI=DI, MISO=DO)          # Create the SPI interface
         UART = busio.UART(tx=board.GP0, rx=board.GP1, baudrate=9600, timeout=10)
 
@@ -122,7 +123,8 @@ def setup() -> None:
         if LS:
             import sparkfun_qwiicas3935     # Lightning Module
             # Create as3935 object
-            lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(I2C1)
+            P_LS = Pin(LS_IRQ, Pin.IN, Pin.PULL_UP)
+            lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(I2C0)
 
             # Check if connected
             if lightning.connected:
@@ -175,7 +177,7 @@ def setup() -> None:
 
             # 128x32 OLED Display
             reset_pin = DigitalInOut(board.D4)
-            display = adafruit_ssd1306.SSD1306_I2C(128, 32, I2C2, reset=reset_pin)
+            display = adafruit_ssd1306.SSD1306_I2C(128, 32, I2C1, reset=reset_pin)
             # Clear the display.
             display.fill(0)
             display.show()
@@ -184,7 +186,7 @@ def setup() -> None:
 
         ## Event Detectors for buttons and Lightning Sensor
         if LS:
-            GPIO.add_event_detect(LS_IRQ, GPIO.RISING, callback=ls_event)
+            P_LS.irq( Pin.IRQ.RISING, callback=ls_event)
         else:
             GPIO.add_event_detect(B1, GPIO.RISING, callback=ls_event)
 
@@ -251,18 +253,3 @@ def lightning() -> str:
     LS_FLAG = False
 
     return ls_out
-
-def cleanup() -> None:
-    """ Cleanup GPIO pins before shutdown if RPi is active
-    
-    Args:
-        None
-    Returns:
-        None
-    """
-    if RPI:
-        if MPY:
-            print("Cleaning up GPIO pins...")
-        else:
-            logging.info("\t%s\t|\tCleaning up GPIO pins", __name__)
-        GPIO.cleanup()
