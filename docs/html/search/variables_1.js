@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['cores_51',['CORES',['../namespacenode_1_1constants.html#a9a45bce9b5b2f1b4d9e03f72759006bc',1,'node::constants']]]
+  ['b1_34',['B1',['../classnode_1_1gpio_1_1_devices.html#a0fe9d5bd566a0c0e3ed5bb0512cfd6e8',1,'node::gpio::Devices']]]
 ];

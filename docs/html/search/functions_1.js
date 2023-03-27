@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['cleanup_37',['cleanup',['../namespacenode_1_1gpio.html#a71c7e850b75669f0740a650da34f77cc',1,'node::gpio']]],
-  ['collect_38',['collect',['../namespacenode_1_1sensor.html#a05e4e278dcb32975e0e93e2436d8d95e',1,'node::sensor']]]
+  ['collect_28',['collect',['../classnode_1_1sensor_1_1_reader.html#aa37521febc571a93e5cbd40de4a742bf',1,'node::sensor::Reader']]]
 ];

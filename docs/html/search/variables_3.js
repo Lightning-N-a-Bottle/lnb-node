@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gps_5ftx_53',['GPS_TX',['../namespacenode_1_1gpio.html#ad480f0780c8eb9c0ec862ea22708e586',1,'node::gpio']]]
+  ['ls_36',['LS',['../namespacenode_1_1constants.html#a3112ecda1c1c4407bd64aec45bb99706',1,'node::constants']]]
 ];
