@@ -31,4 +31,12 @@ LORA = True         # LoRa Radio
 
 ### DEV PARAMETERS ###
 OUTFILE = False     # Set True to print to file, False to console
+
+# LORA
 FREQ = 915.0        # MHz - Frequency channel for LoRa
+TX_POW = 23         # Transmit Power
+
+# AS3935
+NOISE_FLOOR = 2     # (1-7, default=2) Lower to detect smaller strikes, at the cost of more noise
+WATCHDOG_THRESH = 2 # (1-10, default=2) TODO:
+SPIKE_REJECT = 1    # (1-11, default=2) Modify the shape of spikes, round at the cost of range

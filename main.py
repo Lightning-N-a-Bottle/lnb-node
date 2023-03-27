@@ -13,45 +13,16 @@ TODO:
     - sleep and wake from ls spi connection to save power
     - 
 """
-import signal
+# import signal
 import sys
-import threading
+# import threading
 import time
-import datetime
+# import datetime
 
 import node
 
 END = False         # Global Variable that kills threads
 PACKET_QUEUE = []   # Sensor thread indicates when a package is ready
-
-def handler(signum, frame) -> None:
-    """This function will handle any system interrupts that we decide to use
-    It relies on the "signal" python library (see documentation below)
-    https://docs.python.org/3/library/signal.html
-
-    TODO: Add more handling so that the errors can return more information
-
-    Args:
-        signum (int): number associated with interrupt
-        frame (frame): = location that the interrupt came from
-        signame (str): reads the name of the interrupt to the user
-    Returns:
-        None
-    """
-    signame = signal.Signals(signum).name
-    print(f"{__name__}\t| Signal handler called with signal {signame} ({signum})")
-    print(f"{__name__}\t| Frame = {frame}")
-
-    # Handles a user input Ctrl + C
-    if signame == "SIGINT":
-        print(f"{__name__}\t|\tUser manually initiated shutdown using \"CTRL+C\"...")
-        if node.CORES > 1:
-            global END
-            END = True
-        else:
-            sys.exit(0)
-
-    # TODO: Handles a memory access conflict from two threads overlapping
 
 def sens_thread() -> None:
     """Second Thread of the program, calls the "run" function of the Sensor Module.
@@ -69,18 +40,11 @@ def sens_thread() -> None:
             only having 2 cores
     """
     try:
-        global END
-        while not END:
-            node.temp_check()
-            PACKET_QUEUE.append(node.collect())
-            if node.CORES == 1:
-                END = True
-        if node.CORES != 1:
-            print(f"{__name__}\t| Thread 2 finished.")
+        node.temp_check()
+        PACKET_QUEUE.append(node.collect())
 
     except ValueError as val_err:
         print(f"{__name__}\t| ISSUE WITH SENSORS! {val_err}")
-        END = True
 
 def lora_thread() -> None:
     """First Thread of the program, calls the "run" function of the LoRa Module.
@@ -94,17 +58,8 @@ def lora_thread() -> None:
     Returns:
         None
     """
-    global END
-    while not END:
-        # global PACKET_QUEUE
-        if len(PACKET_QUEUE) > 0:
-            node.send(PACKET_QUEUE.pop(0))
-        elif node.CORES == 1:
-            END = True
-        time.sleep(1)
-    if node.CORES != 1:
-        print(f"{__name__}\t| Thread 1 finished.")
-    END = True
+    if len(PACKET_QUEUE) > 0:
+        node.send(PACKET_QUEUE.pop(0))
 
 def main():
     """
@@ -116,14 +71,7 @@ def main():
     print(f"{__name__}\t|\t* GPIO ENABLED...")
     node.gpio.setup()
 
-    # Initial LoRa exchange
-    # name = node.init()
-    # node.setname(name)
-
     print(f"{__name__}\t| * Starting up device with %d Cores...")
-
-    # Initialize Listener (for CTRL+C interrupts)
-    signal.signal(signal.SIGINT, handler)
 
     try:
         # Setting up Threads based on core count
@@ -132,11 +80,8 @@ def main():
 
         elif node.CORES == 1:
             while True:
-                global END
                 sens_thread()
-                END = False
                 lora_thread()
-                END = False
 
         else:
             t1 = threading.Thread(target=sens_thread)
