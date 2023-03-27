@@ -24,10 +24,10 @@ except AttributeError:
         RPI = True
 
 ### WHAT MODULES ARE CURRENTLY CONNECTED ###
-LS = False          # Lightning Sensor
-RTC = False         # Real Time Clock
-GPS = False         # GPS Location
-LORA = True         # LoRa Radio
+LS = True          # Lightning Sensor
+RTC = True         # Real Time Clock
+GPS = True         # GPS Location
+LORA = False         # LoRa Radio
 
 ### DEV PARAMETERS ###
 OUTFILE = False     # Set True to print to file, False to console

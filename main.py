@@ -13,11 +13,7 @@ TODO:
     - sleep and wake from ls spi connection to save power
     - 
 """
-# import signal
 import sys
-# import threading
-import time
-# import datetime
 
 import node
 
@@ -40,8 +36,7 @@ def sens_thread() -> None:
             only having 2 cores
     """
     try:
-        node.temp_check()
-        PACKET_QUEUE.append(node.collect())
+        PACKET_QUEUE.append(reader.collect())
 
     except ValueError as val_err:
         print(f"{__name__}\t| ISSUE WITH SENSORS! {val_err}")
@@ -69,7 +64,9 @@ def main():
     """
     # System Settings
     print(f"{__name__}\t|\t* GPIO ENABLED...")
-    node.gpio.setup()
+    global devices, reader
+    devices = node.Devices()
+    reader = node.Reader(devices=devices, name="Node_A")
 
     print(f"{__name__}\t| * Starting up device with %d Cores...")
 
