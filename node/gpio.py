@@ -50,23 +50,23 @@ class Devices:
                 # Set update rate to once a second (1hz) which is what you typically want.
                 gps_module.send_command(b"PMTK220,1000")
 
-                # # Wait until the GPS obtains a fix
-                # while not gps_module.has_fix:
-                #     print("Waiting for fix...")
-                #     time.sleep(1)
+                # Wait until the GPS obtains a fix
+                while not gps_module.has_fix:
+                    print("Waiting for fix...")
+                    time.sleep(1)
 
-                # # Set RTC using Fix timestamp
-                # self.clock.datetime = time.struct_time((
-                #     gps_module.timestamp_utc.tm_year,
-                #     gps_module.timestamp_utc.tm_mon,
-                #     gps_module.timestamp_utc.tm_mday,
-                #     gps_module.timestamp_utc.tm_hour,
-                #     gps_module.timestamp_utc.tm_min,
-                #     gps_module.timestamp_utc.tm_sec,
-                #     0,
-                #     -1,
-                #     -1
-                # ))
+                # Set RTC using Fix timestamp
+                self.clock.datetime = time.struct_time((
+                    gps_module.timestamp_utc.tm_year,
+                    gps_module.timestamp_utc.tm_mon,
+                    gps_module.timestamp_utc.tm_mday,
+                    gps_module.timestamp_utc.tm_hour,
+                    gps_module.timestamp_utc.tm_min,
+                    gps_module.timestamp_utc.tm_sec,
+                    0,
+                    -1,
+                    -1
+                ))
 
                 # Store GPS location
                 # gps.latitude_degrees, gps.latitude_minutes
