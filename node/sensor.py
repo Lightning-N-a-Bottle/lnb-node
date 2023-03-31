@@ -47,8 +47,11 @@ class Reader:
         # Acquire RTC Timestamp
         tstmp: str = self.devices.timestamp()
 
+        # Acquire GPS Packet
+        gps: str = self.devices.gps_lat_long
+
         # Append to PACKET_QUEUE
-        packet: str = f"STK:{self.name},{tstmp},{lng}"
+        packet: str = f"STK:{self.name},{tstmp},{lng},{gps}"
         print(f"{__name__}\t|\tCREATED={packet}")
 
         return packet
