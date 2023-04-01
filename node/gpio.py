@@ -5,16 +5,17 @@ Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 GPIO Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1gpio.html
 """
-import time
 import sys
-
-from .constants import RPI, GPS, LS, NOISE_FLOOR, WATCHDOG_THRESH, SPIKE_REJECT#, LORA, FREQ, TX_POW
+import time
 
 # import RPi.GPIO as GPIO
+import board
 import busio
 import digitalio
-import board
 import rtc
+
+from .constants import (GPS, LS, NOISE_FLOOR, RPI, SPIKE_REJECT, WATCHDOG_THRESH)
+
 
 class Devices:
     """ Class to interact with all modules """
@@ -42,7 +43,7 @@ class Devices:
             self.clock = rtc.RTC()
             ### Initialize Modules
             if GPS:
-                import adafruit_gps                         # GPS Module
+                import adafruit_gps  # GPS Module
                 UART = busio.UART(tx=board.GP0, rx=board.GP1, baudrate=9600, timeout=10)
                 gps_module = adafruit_gps.GPS(UART, debug=False)   # Use UART/pyserial
                 # Turn on the basic GGA and RMC info (what you typically want)
@@ -53,6 +54,7 @@ class Devices:
                 # Wait until the GPS obtains a fix
                 while not gps_module.has_fix:
                     print("Waiting for fix...")
+                    gps_module.update()     # Refreshes "has_fix" value
                     time.sleep(1)
 
                 # Set RTC using Fix timestamp
@@ -81,7 +83,7 @@ class Devices:
 
 
             if LS:
-                import sparkfun_qwiicas3935     # Lightning Module
+                import sparkfun_qwiicas3935  # Lightning Module
 
                 # Set up Interrupt pin on GPIO D21 with a pull-down resistor
                 self.as3935_interrupt_pin = digitalio.DigitalInOut(board.GP8)
