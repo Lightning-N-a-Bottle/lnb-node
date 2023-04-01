@@ -7,6 +7,16 @@ GPIO Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespac
 """
 import sys
 import time
+import sys
+
+from .constants import (
+    RPI,
+    GPS,
+    LS,
+    NOISE_FLOOR,
+    WATCHDOG_THRESH,
+    SPIKE_REJECT,
+)  # , LORA, FREQ, TX_POW
 
 # import RPi.GPIO as GPIO
 import board
@@ -14,26 +24,12 @@ import busio
 import digitalio
 import rtc
 
-from .constants import (GPS, LS, NOISE_FLOOR, RPI, SPIKE_REJECT, WATCHDOG_THRESH)
-
 
 class Devices:
     """ Class to interact with all modules """
-
-    ### DEFINE GPIO PINS ###
-    ### Shared Pins
-    DI = 10         # GPIO 10 or Pin 19 | LoRa DI or LS MOSI
-    DO = 9          # GPIO 9 or Pin 21  | LoRa DO or LS MISO
-    CLK = 11        # GPIO 11 or Pin 23 | Clock
-
-    ### Misc pins
-    B1 = 5          # GPIO 5 or Pin 29  |
-    B2 = 6          # GPIO 6 or Pin 12  |
-    B3 = 12         # GPIO 12 or Pin 32 |
-
     def __init__(self) -> None:
-        """ Initializes RPI GPIO pins
-        
+        """Initializes RPI GPIO pins
+
         Args:
             None
         Returns:
@@ -43,9 +39,14 @@ class Devices:
             self.clock = rtc.RTC()
             ### Initialize Modules
             if GPS:
-                import adafruit_gps  # GPS Module
+                import adafruit_gps # GPS Module
+
+                GPS_ENABLE = digitalio.DigitalInOut(board.GP3)
+                GPS_ENABLE.direction = digitalio.Direction.OUTPUT
+                GPS_ENABLE.value = 1
                 UART = busio.UART(tx=board.GP0, rx=board.GP1, baudrate=9600, timeout=10)
-                gps_module = adafruit_gps.GPS(UART, debug=False)   # Use UART/pyserial
+                gps_module = adafruit_gps.GPS(UART, debug=False)    # Use UART/pyserial
+
                 # Turn on the basic GGA and RMC info (what you typically want)
                 gps_module.send_command(b"PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0")
                 # Set update rate to once a second (1hz) which is what you typically want.
@@ -56,19 +57,22 @@ class Devices:
                     print("Waiting for fix...")
                     gps_module.update()     # Refreshes "has_fix" value
                     time.sleep(1)
+                print("Got GPS Fix!")
 
                 # Set RTC using Fix timestamp
-                self.clock.datetime = time.struct_time((
-                    gps_module.timestamp_utc.tm_year,
-                    gps_module.timestamp_utc.tm_mon,
-                    gps_module.timestamp_utc.tm_mday,
-                    gps_module.timestamp_utc.tm_hour,
-                    gps_module.timestamp_utc.tm_min,
-                    gps_module.timestamp_utc.tm_sec,
-                    0,
-                    -1,
-                    -1
-                ))
+                self.clock.datetime = time.struct_time(
+                    (
+                        gps_module.timestamp_utc.tm_year,
+                        gps_module.timestamp_utc.tm_mon,
+                        gps_module.timestamp_utc.tm_mday,
+                        gps_module.timestamp_utc.tm_hour,
+                        gps_module.timestamp_utc.tm_min,
+                        gps_module.timestamp_utc.tm_sec,
+                        0,
+                        -1,
+                        -1,
+                    )
+                )
 
                 # Store GPS location
                 # gps.latitude_degrees, gps.latitude_minutes
@@ -77,10 +81,11 @@ class Devices:
                 # gps.satellites
                 # gps.altitude_m
                 # gps.speed_knots
-                self.gps_packet: str = f"STK:{self.timestamp()},{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
+                self.gps_packet: str = f"GPS:{self.timestamp()},{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
+                self.gps_lat_long = f"{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
 
                 # Turn off GPS
-
+                GPS_ENABLE.value = 0
 
             if LS:
                 import sparkfun_qwiicas3935  # Lightning Module
@@ -91,12 +96,12 @@ class Devices:
                 self.as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
                 # Create as3935 object
-                i2c0 = busio.I2C(board.GP7, board.GP6)          # Create the first I2C interface
+                i2c0 = busio.I2C(board.GP7, board.GP6)  # Create the first I2C interface
                 self.as3935 = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c0)
 
                 # Check if connected
                 if not self.as3935.connected:
-                    print("Lightning Detector does not appear to be connected. Please check wiring.")
+                    print("Lightning Detector not connected. Please check wiring.")
                     sys.exit(1)
 
                 # Set Mode
@@ -118,7 +123,6 @@ class Devices:
                 self.as3935_interrupt_pin = digitalio.DigitalInOut(board.GP8)
                 self.as3935_interrupt_pin.direction = digitalio.Direction.INPUT
                 self.as3935_interrupt_pin.pull = digitalio.Pull.DOWN
-
 
     def timestamp(self) -> str:
         """ Acquire current time from Real Time Clock Module
@@ -151,32 +155,42 @@ class Devices:
         intensity = "disabled"
 
         try:
+
+            i = 0
             while True:
+
                 # When the interrupt goes high
                 if self.as3935_interrupt_pin.value:
                     if LS:
+
                         print("Interrupt:", end=" ")
                         interrupt_value = self.as3935.read_interrupt_register()
 
+                        # Distance estimation takes into account previous events.
+                        distance = self.as3935.distance_to_storm
+                        # Energy is a pure number with no physical meaning.
+                        intensity = self.as3935.lightning_energy
+
+                        print("Energy: " + str(distance))
+                        intensity = self.as3935.lightning_energy
+
                         if interrupt_value == self.as3935.NOISE:
-                            # print("Noise.")
+                            print("Noise.")
                             self.as3935.clear_statistics()
                         elif interrupt_value == self.as3935.DISTURBER:
-                            # print("Disturber.")
-                            self.as3935.clear_statistics()
-                        elif interrupt_value == self.as3935.LIGHTNING:
-                            print("Lightning strike detected!")
-                            # Distance estimation takes into account previous events.
-                            # print("Approximately: " + str(self.as3935.distance_to_storm) + "km away!")
-                            distance = self.as3935.distance_to_storm
-                            # Energy is a pure number with no physical meaning.
-                            # print("Energy: " + str(self.as3935.lightning_energy))
-                            intensity = self.as3935.lightning_energy
+                            i += 1
+                            print(f"Disturber {i} detected {distance}km away!")
                             self.as3935.clear_statistics()
                             break
+                        elif interrupt_value == self.as3935.LIGHTNING:
+                            print(f"Lightning strike detected {distance}km away!")
+                            print(f"Energy: {intensity}")
+                            self.as3935.clear_statistics()
+                            break
+
                     else:
                         break
-                    time.sleep(.5)
+                    time.sleep(0.5)
         except KeyboardInterrupt:
             pass
 
