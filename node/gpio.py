@@ -81,10 +81,11 @@ class Devices:
                 # gps.satellites
                 # gps.altitude_m
                 # gps.speed_knots
+                #TODO Fix the gps.lat_degrees to just gps.lat/gps.long
                 self.gps_packet: str = f"GPS:{self.timestamp()},{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
                 self.gps_lat_long = f"{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
 
-                # Turn off GPS
+                # Turn off GPS TODO Maybe add this so if GPS = False it still turns off for the LS
                 GPS_ENABLE.value = 0
 
             if LS:
@@ -181,6 +182,7 @@ class Devices:
                             i += 1
                             print(f"Disturber {i} detected {distance}km away!")
                             self.as3935.clear_statistics()
+                            # Comment out break to not save to csv
                             break
                         elif interrupt_value == self.as3935.LIGHTNING:
                             print(f"Lightning strike detected {distance}km away!")
