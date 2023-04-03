@@ -37,13 +37,16 @@ class Devices:
         """
         if RPI:
             self.clock = rtc.RTC()
+
             ### Initialize Modules
+            GPS_ENABLE = digitalio.DigitalInOut(board.GP3)
+            GPS_ENABLE.direction = digitalio.Direction.OUTPUT
+
             if GPS:
                 import adafruit_gps # GPS Module
-
-                GPS_ENABLE = digitalio.DigitalInOut(board.GP3)
-                GPS_ENABLE.direction = digitalio.Direction.OUTPUT
+                # Enable GPS for collection
                 GPS_ENABLE.value = 1
+
                 UART = busio.UART(tx=board.GP0, rx=board.GP1, baudrate=9600, timeout=10)
                 gps_module = adafruit_gps.GPS(UART, debug=False)    # Use UART/pyserial
 
@@ -81,11 +84,13 @@ class Devices:
                 # gps.satellites
                 # gps.altitude_m
                 # gps.speed_knots
-                self.gps_packet: str = f"GPS:{self.timestamp()},{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
                 self.gps_lat_long = f"{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
 
-                # Turn off GPS
-                GPS_ENABLE.value = 0
+            else:
+                self.gps_lat_long = "-1,-1"
+
+            # Turn off GPS Module after Fix or if disabled in constants.py
+            GPS_ENABLE.value = 0
 
             if LS:
                 import sparkfun_qwiicas3935  # Lightning Module
