@@ -99,6 +99,10 @@ class Devices:
                 self.as3935_interrupt_pin = digitalio.DigitalInOut(board.GP8)
                 self.as3935_interrupt_pin.direction = digitalio.Direction.INPUT
                 self.as3935_interrupt_pin.pull = digitalio.Pull.DOWN
+                
+                # On board LED for lightning detection
+                self.PiLED = digitalio.DigitalInOut(board.LED)
+                self.PiLED.direction = digitalio.Direction.OUTPUT
 
                 # Create as3935 object
                 i2c0 = busio.I2C(board.GP7, board.GP6)  # Create the first I2C interface
@@ -186,16 +190,20 @@ class Devices:
                             i += 1
                             print(f"Disturber {i} detected {distance}km away!")
                             self.as3935.clear_statistics()
+                            # Comment out break to not save to csv
                             break
                         elif interrupt_value == self.as3935.LIGHTNING:
                             print(f"Lightning strike detected {distance}km away!")
                             print(f"Energy: {intensity}")
+                            #Turn on PiLED
+                            self.PiLED.value = 1
                             self.as3935.clear_statistics()
                             break
 
                     else:
                         break
                     time.sleep(0.5)
+                    self.PiLED.value = 0
         except KeyboardInterrupt:
             pass
 
