@@ -56,10 +56,12 @@ def send(packet: str) -> None:
     file = open("/sd/lightning.csv", "a")
 
     # write the "packet" to the file
-    file.write(packet)
+    file.write(packet+"\n") # need an escape character for csv
 
     # close the file
     file.close()
 
     # else:
         # logging.error("\t%s\t|\tResponse was different...", __name__)
+
+# TimeStamp,Distance,gps lat, gps long
