@@ -1,7 +1,7 @@
 """
 __init__.py
 """
-from .constants import CORES, RPI, OUTFILE
+from .constants import CORES, OUTFILE, RPI
 from .gpio import Devices
-from .storage import send
-from .sensor import Reader
+from .sensor import Sensor
+from .storage import Storage

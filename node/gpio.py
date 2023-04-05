@@ -7,7 +7,6 @@ GPIO Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespac
 """
 import sys
 import time
-import sys
 
 from .constants import (
     RPI,

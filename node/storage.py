@@ -14,54 +14,69 @@ import digitalio
 import sdcardio
 import storage
 
-# Set up GPIO for SD Card
-spi = busio.SPI(board.GP18, board.GP19, board.GP16)
-cs = board.GP17
+class Storage:
+    """ Class set  """
+    def __init__(self):
+        """ Initial setup for the SD Card
+        
+            This will create an SD Card object, format it, then mount it to the filesystem
+            Afterwards, the SD Card will be able to be accessed like a normal part of the filesystem
+        """
+        # Create the SD object
+        spi = busio.SPI(board.GP18, board.GP19, board.GP16)
+        cs = board.GP17
+        baud = 8000000
+        sd = sdcardio.SDCard(spi, cs, baud)
 
-# Create the SD object
-sd = sdcardio.SDCard(spi, cs)
+        # Format the storage
+        vfs = storage.VfsFat(sd)
 
-# Format the storage
-vfs = storage.VfsFat(sd)
+        # Mount the drive and call id /sd
+        storage.mount(vfs, '/sd')
 
-# Mount the drive and call id /sd
-storage.mount(vfs, '/sd')
+        # list all files in the drive
+        os.listdir('/sd')
 
-# list all files in the drive
-os.listdir('/sd')
-
-def send(packet: str) -> None:
-    """ Processes Main LoRa communications with packet transfer
+        # Generate initial CSV
+        self.generate_csv()
 
 
+    def generate_csv(self, filename="local") -> None:
+        """ Sets up the headers on a CSV file
 
-    Args:
-        packet (str): The compiled string that will be sent over LoRa
-    Returns:
-        None
+            This is called automatically during initialization for the "local.csv" file
+            However, if additional files are desired then this function can be called again with
+            a different value for the "filename" parameter
 
-    TODO: Should the return type be none, or should it wait for confirmation?
-    """
-    # Debug packet
-    # if "PACK:" in packet:
-    # logging.info("\t%s\t|\tpacket=%s\n", __name__, packet)
-    # else:
+            Args:
+                filename (str): [default="local"] Filename to initalize (exclude file suffix)
+            Returns:
+                None
+            TODO: Add a safety to prevent calling this on an already existing file (see TODO in self.save())
+        """
+        headers = "Timestamp,GPS_Latitude,GPS_Longitude,Lightning Distance,Lightning Intensity"
 
-    # Send Packet
-    # lora_tx(packet)
+        # Open the file on the sd card to save the lightning data and sent to append "a"
+        file = open(f"/sd/{filename}.csv", "a")
+        file.write(headers+"\n") # need an escape character for csv
+        file.close()
 
-    print(f"{__name__}\t|\tDELIVERED={packet}")
-    # Append as needed
-    # Open the file on the sd card to save the lightning data and sent to append "a"
-    file = open("/sd/lightning.csv", "a")
 
-    # write the "packet" to the file
-    file.write(packet+"\n") # need an escape character for csv
+    def save(self, packet: str, filename="local") -> None:
+        """ Saves a new packet to an existing CSV file
 
-    # close the file
-    file.close()
+        Args:
+            packet (str): The compiled string that will be sent over LoRa
+            filename (str): [default="local"] Filename to append the packet (exclude file suffix)
+        Returns:
+            None
+        TODO: Add a safety to prevent calling this on an uninitialized file, maybe call generate_csv() here if new file
+        """
 
-    # else:
-        # logging.error("\t%s\t|\tResponse was different...", __name__)
+        # Open the file on the sd card to save the lightning data and sent to append "a"
+        file = open(f"/sd/{filename}.csv", "a")
+        file.write(packet+"\n") # need an escape character for csv
+        file.close()
 
-# TimeStamp,Distance,gps lat, gps long
+        # Print Packet for debugging
+        print(f"{__name__}\t|\tDELIVERED={packet}")

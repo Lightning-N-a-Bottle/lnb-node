@@ -54,7 +54,7 @@ def lora_thread() -> None:
         None
     """
     if len(PACKET_QUEUE) > 0:
-        node.send(PACKET_QUEUE.pop(0))
+        card.save(PACKET_QUEUE.pop(0))
 
 def main():
     """
@@ -64,9 +64,10 @@ def main():
     """
     # System Settings
     print(f"{__name__}\t|\t* GPIO ENABLED...")
-    global devices, reader
+    global devices, reader, card
     devices = node.Devices()
-    reader = node.Reader(devices=devices, name="Node_A")
+    reader = node.Sensor(devices=devices)
+    card = node.Storage()
 
     print(f"{__name__}\t| * Starting up device with %d Cores...")
 
