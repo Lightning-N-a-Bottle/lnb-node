@@ -88,7 +88,7 @@ class Sensor:
             self.as3935_interrupt_pin.direction = digitalio.Direction.INPUT
             self.as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
-    def get_GPS_Fix(self):
+    def get_GPS_Fix(self) -> str:
         """ Acquire current GPS Fix from the module communicating with satellites
 
         This function will block until a GPS Fix is acquired, then 
@@ -97,6 +97,7 @@ class Sensor:
             None
         Returns:
             time (str): current time
+        TODO: Potentially add a timeout for this feature? Is any data even viable without a GPS Fix/Timestamp update?
         """
         if GPS:
             import adafruit_gps # GPS Module
@@ -127,8 +128,8 @@ class Sensor:
                     gps_module.timestamp_utc.tm_hour,
                     gps_module.timestamp_utc.tm_min,
                     gps_module.timestamp_utc.tm_sec,
-                    0,
-                    -1,
+                    gps_module.timestamp_utc.tm_wday,
+                    gps_module.timestamp_utc.tm_yday,
                     -1,
                 )
             )
@@ -159,7 +160,8 @@ class Sensor:
             time (str): current time
         TODO: Reformat the timestamp into an easily readable string
         """
-        timestring = self.clock.datetime
+        # timestring = self.clock.datetime
+        timestring = time.monotonic()
         return timestring
 
     def lightning(self) -> str:
