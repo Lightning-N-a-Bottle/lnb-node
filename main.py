@@ -62,9 +62,8 @@ def main():
     """
     # System Settings
     print(f"{__name__}\t|\t* GPIO ENABLED...")
-    global devices, reader, card
-    devices = node.Devices()
-    reader = node.Sensor(devices=devices)
+    global reader, card
+    reader = node.Sensor()
     card = node.Storage()
 
     print(f"{__name__}\t| * Starting up device with %d Cores...")
@@ -89,7 +88,6 @@ def main():
             t1.join()
 
         # System Settings
-        node.gpio.cleanup()
         print(f"{__name__}\t|\tAll Threads finished...exiting")
 
     except ValueError as val_err:       # TODO: Handle other error types better
