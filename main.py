@@ -9,9 +9,7 @@ Documentation Notes:
     - https://stackoverflow.com/questions/1523427/what-is-the-common-header-format-of-python-files
     - https://www.tutorialspoint.com/python/python_multithreading.htm
 TODO:
-    - look into machine package - https://docs.micropython.org/en/latest/library/machine.html
-    - sleep and wake from ls spi connection to save power
-    - 
+    - sleep and wake from ls spi connection to save power (probably not needed)
 """
 import sys
 
