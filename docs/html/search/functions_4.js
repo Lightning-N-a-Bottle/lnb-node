@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['timestamp_32',['timestamp',['../classnode_1_1gpio_1_1_devices.html#ac781d99cede90d272ba48c464c40d842',1,'node::gpio::Devices']]]
+  ['save_29',['save',['../classnode_1_1storage_1_1_storage.html#a13643637a44750dd74a93df54140eaf0',1,'node::storage::Storage']]]
 ];

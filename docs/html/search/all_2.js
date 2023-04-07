@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['b1_2',['B1',['../classnode_1_1gpio_1_1_devices.html#a0fe9d5bd566a0c0e3ed5bb0512cfd6e8',1,'node::gpio::Devices']]]
+  ['generate_5fcsv_3',['generate_csv',['../classnode_1_1storage_1_1_storage.html#a88242b58d1d86dc1f05c653ab0c66899',1,'node::storage::Storage']]],
+  ['get_5fgps_5ffix_4',['get_GPS_Fix',['../classnode_1_1sensor_1_1_sensor.html#aef83d94906e541be664384daa492cceb',1,'node::sensor::Sensor']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['as3935_5finterrupt_5fpin_33',['as3935_interrupt_pin',['../classnode_1_1gpio_1_1_devices.html#a9ca6b04110a3e4191988977f7a4d0464',1,'node::gpio::Devices']]]
+  ['clock_31',['clock',['../classnode_1_1sensor_1_1_sensor.html#a285557b976d247d361c4eb4ab3c779bd',1,'node::sensor::Sensor']]]
 ];
