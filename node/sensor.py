@@ -100,7 +100,7 @@ class Sensor:
         """
         return self.filename
 
-    def get_GPS_Fix(self) -> tuple[float, float]:
+    def get_GPS_Fix(self) -> "tuple[float, float]":
         """ Acquire current GPS Fix from the module communicating with satellites
 
         This function will block until a GPS Fix is acquired, then it will set the rtc value

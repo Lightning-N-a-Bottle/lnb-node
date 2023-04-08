@@ -82,13 +82,13 @@ def main():
                 sdcard_thread()
 
         else:
-            t1 = threading.Thread(target=sens_thread)
-            t1.start()
+            # t1 = threading.Thread(target=sens_thread)
+            # t1.start()
             print(f"{__name__}\t|\tThreads Launched...\n")
-            sdcard_thread()       # This is a blocking function call until END is set True
+            # sdcard_thread()       # This is a blocking function call until END is set True
 
             # Safely closing all threads
-            t1.join()
+            # t1.join()
 
         # System Settings
         print(f"{__name__}\t|\tAll Threads finished...exiting")

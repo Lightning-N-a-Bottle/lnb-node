@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['send_17',['send',['../namespacenode_1_1_lo_ra.html#ab0cd7f06515fca48bff4e2cc11d4f91f',1,'node::LoRa']]],
-  ['setname_18',['setname',['../classnode_1_1sensor_1_1_reader.html#a6e9c5ff3137f8177ea608fa2465563e5',1,'node::sensor::Reader']]]
+  ['timestamp_19',['timestamp',['../classnode_1_1sensor_1_1_sensor.html#aaef1dbb0f3558d2fba97e3c79d124748',1,'node::sensor::Sensor']]]
 ];

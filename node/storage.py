@@ -10,7 +10,6 @@ import os
 # Circuitpython imports
 import board
 import busio
-import digitalio
 import sdcardio
 import storage
 
@@ -67,7 +66,6 @@ class Storage:
                 filename (str): [default="local"] Filename to initalize (exclude file suffix)
             Returns:
                 None
-            TODO: Add a safety to prevent calling this on an already existing file (see TODO in self.save())
         """
         # Generate the inital Header row
         headers = "Timestamp,GPS_Latitude,GPS_Longitude,Lightning Distance,Lightning Intensity"
@@ -81,12 +79,13 @@ class Storage:
     def save(self, packet: str) -> None:
         """ Saves a new packet to an existing CSV file
 
+        If the file has not yet been created, then it should call a function to generate a file
+        with the appropriate headers.
+
         Args:
             packet (str): The compiled string that will be sent over LoRa
-            filename (str): [default="local"] Filename to append the packet (exclude file suffix)
         Returns:
             None
-        TODO: Add a safety to prevent calling this on an uninitialized file, maybe call generate_csv() here if new file
         """
         # Generate the full path to the output csv
         filepath = f"/sd/{self.filename}.csv"
