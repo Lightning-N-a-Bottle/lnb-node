@@ -10,18 +10,14 @@ LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespac
 import sys
 import time
 
-from .constants import (
-    GPS,
-    LS,
-    NOISE_FLOOR,
-    WATCHDOG_THRESH,
-    SPIKE_REJECT,
-)
-
+# Circuit Python Imports
 import board
 import busio
 import digitalio
 import rtc
+
+# Module Constants
+from .constants import GPS, LS, NOISE_FLOOR, SPIKE_REJECT, WATCHDOG_THRESH
 
 class Sensor:
     """ Reads the sensors """
@@ -41,12 +37,18 @@ class Sensor:
         ### Initialize Modules
         self.clock = rtc.RTC()
 
+        # Setup GPS Module
         self.GPS_ENABLE = digitalio.DigitalInOut(board.GP3)
         self.GPS_ENABLE.direction = digitalio.Direction.OUTPUT
-        self.gps_fix = self.get_GPS_Fix()
+        self.gps_lat, self.gps_long = self.get_GPS_Fix()
+
+        # Generate the filename to append the values to (a new file is generated after each reboot)
+        self.filename = f"{self.timestamp()}_({self.gps_lat},{self.gps_long})"
+
         # Turn off GPS Module after Fix or if disabled in constants.py
         self.GPS_ENABLE.value = 0
 
+        # Setup Lightning Sensor Module
         if LS:
             import sparkfun_qwiicas3935  # Lightning Module
 
@@ -65,18 +67,18 @@ class Sensor:
 
             # Check if connected
             if not self.as3935.connected:
-                print("Lightning Detector not connected. Please check wiring.")
+                print(f"{__name__}\t| ERROR - Lightning Detector not connected. Please check wiring.")
                 sys.exit(1)
 
             # Set Mode
             self.as3935.indoor_outdoor = self.as3935.OUTDOOR
             afe_mode = self.as3935.indoor_outdoor
             if afe_mode == self.as3935.OUTDOOR:
-                print(f"{__name__}\t| The Lightning Detector is in the Outdoor mode.")
+                print(f"{__name__}\t| DEBUG - The Lightning Detector is in the Outdoor mode.")
             elif afe_mode == self.as3935.INDOOR:
-                print(f"{__name__}\t| The Lightning Detector is in the Indoor mode.")
+                print(f"{__name__}\t| DEBUG - The Lightning Detector is in the Indoor mode.")
             else:
-                print(f"{__name__}\t| The Lightning Detector is in an Unknown mode.")
+                print(f"{__name__}\t| DEBUG - The Lightning Detector is in an Unknown mode.")
 
             # Callibrate - If these parameters should be changed, then do so in py
             self.as3935.noise_level = NOISE_FLOOR
@@ -88,19 +90,33 @@ class Sensor:
             self.as3935_interrupt_pin.direction = digitalio.Direction.INPUT
             self.as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
-    def get_GPS_Fix(self) -> str:
+    def get_filename(self) -> str:
+        """ Getter function for the csv filename
+        
+        Args:
+            None
+        Returns:
+            filename (str): formatted name to identify the data from the current session
+        """
+        return self.filename
+
+    def get_GPS_Fix(self) -> tuple[float, float]:
         """ Acquire current GPS Fix from the module communicating with satellites
 
-        This function will block until a GPS Fix is acquired, then 
+        This function will block until a GPS Fix is acquired, then it will set the rtc value
+        and return both the timestamp and the gps coordinates
 
         Args:
             None
         Returns:
-            time (str): current time
+
+            gps_lat (float): monotonic time value of the fix, used later to name the csv and to 
+            gps_long (str): float representing the gps longitude
         TODO: Potentially add a timeout for this feature? Is any data even viable without a GPS Fix/Timestamp update?
         """
         if GPS:
-            import adafruit_gps # GPS Module
+            import adafruit_gps  # GPS Module
+
             # Enable GPS for collection
             self.GPS_ENABLE.value = 1
 
@@ -117,7 +133,7 @@ class Sensor:
                 print("Waiting for fix...")
                 gps_module.update()     # Refreshes "has_fix" value
                 time.sleep(1)
-            print("Got GPS Fix!")
+            print(f"{__name__}\t| DEBUG - Got GPS Fix!")
 
             # Set RTC using Fix timestamp
             self.clock.datetime = time.struct_time(
@@ -141,12 +157,16 @@ class Sensor:
             # gps.satellites
             # gps.altitude_m
             # gps.speed_knots
-            return f"{gps_module.latitude_degrees},{gps_module.longitude_degrees}"
+            gps_lat = gps_module.latitude
+            gps_long = gps_module.longitude
 
         else:
-            self.gps_fix = "-1,-1"
+            gps_lat: float = -1
+            gps_long: float = -1
 
-    def timestamp(self) -> str:
+        return gps_lat, gps_long
+
+    def timestamp(self) -> int:
         """ Acquire current time from Real Time Clock Module.
 
         This uses the internal Pico RTC module, but alternatively it can be used with an external
@@ -189,7 +209,6 @@ class Sensor:
                 # When the interrupt goes high
                 if self.as3935_interrupt_pin.value:
                     if LS:
-                        print("Interrupt:", end=" ")
                         interrupt_value = self.as3935.read_interrupt_register()
 
                         # Distance estimation takes into account previous events.
@@ -197,21 +216,17 @@ class Sensor:
                         # Energy is a pure number with no physical meaning.
                         intensity = self.as3935.lightning_energy
 
-                        print("Energy: " + str(distance))
-                        intensity = self.as3935.lightning_energy
-
                         if interrupt_value == self.as3935.NOISE:
-                            print("Noise.")
+                            print(f"{__name__}\t| DEBUG - Noise.")
                             self.as3935.clear_statistics()
                         elif interrupt_value == self.as3935.DISTURBER:
                             i += 1
-                            print(f"Disturber {i} detected {distance}km away!")
+                            print(f"{__name__}\t| INFO - Disturber {i} detected {distance}km away!")
                             self.as3935.clear_statistics()
                             # Comment out break to not save to csv
                             break
                         elif interrupt_value == self.as3935.LIGHTNING:
-                            print(f"Lightning strike detected {distance}km away!")
-                            print(f"Energy: {intensity}")
+                            print(f"{__name__}\t| INFO - Lightning strike detected {distance}km away!")
                             #Turn on PiLED
                             self.PiLED.value = 1
                             self.as3935.clear_statistics()
@@ -241,12 +256,12 @@ class Sensor:
             packet (str): The properly formatted packet to be passed to LoRa
         """
         # When lightning is detected, this will populate the string with the sensor data
-        lng: str = self.lightning()     # Acquire Lightning Distance/Intensity
+        stk: str = self.lightning()     # Acquire Lightning Distance/Intensity
         # Acquire RTC Timestamp, this has to come after the lightning strike
         tstmp: str = self.timestamp()   # Acquire the formatted timestruct
 
         # Append to PACKET_QUEUE
-        packet: str = f"{tstmp},{self.gps_fix},{lng}"
-        print(f"{__name__}\t|\tCREATED={packet}")
+        packet: str = f"{tstmp},{self.gps_lat},{self.gps_long},{stk}"
+        print(f"{__name__}\t| CREATED={packet}")
 
         return packet

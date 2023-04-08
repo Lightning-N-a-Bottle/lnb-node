@@ -6,9 +6,9 @@ Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.ht
 Constants Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1constants.html
 """
 import os
-MPY = False         # Running MicroPython
-CORES = 1
-RPI = False
+MPY: bool = False   # Running MicroPython
+CORES: int = 1      # System Core Count (For multithreading)
+RPI: bool = False   # Running on a Raspberry Pi
 try:
     if os.uname().sysname == "rp2040":
         print("Running on a Pico!")
@@ -24,21 +24,13 @@ except AttributeError:
         RPI = True
 
 ### WHAT MODULES ARE CURRENTLY CONNECTED ###
-LS = True          # Lightning Sensor
-RTC = True         # Real Time Clock
-GPS = True         # GPS Location
-CARD = True        # SD Card Module
+LS: bool = True         # Lightning Sensor
+GPS: bool = True        # GPS Module
+CARD: bool = True       # SD Card Module
+RTC: bool = False       # Real Time Clock [True for external, False for internal] *not currently used
 
 ### DEV PARAMETERS ###
-OUTFILE = False     # Set True to print to file, False to console
-
-# LORA
-FREQ = 915.0        # MHz - Frequency channel for LoRa
-TX_POW = 23         # Transmit Power
-
 # AS3935
-NOISE_FLOOR = 5     # (1-7, default=2) Lower to detect smaller strikes, at the cost of more noise
-WATCHDOG_THRESH = 2 # (1-10, default=2) TODO:
-SPIKE_REJECT = 1
-
-# (1-11, default=2) Modify the shape of spikes, round at the cost of range
+NOISE_FLOOR: int = 5        # (1-7, default=2) Lower to detect smaller strikes, with more noise
+WATCHDOG_THRESH: int = 2    # (1-10, default=2) TODO:
+SPIKE_REJECT: int = 1       # (1-11, default=2) Modify the shape of spikes, round with lower range

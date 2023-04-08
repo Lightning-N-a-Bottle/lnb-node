@@ -9,7 +9,7 @@ Documentation Notes:
     - https://stackoverflow.com/questions/1523427/what-is-the-common-header-format-of-python-files
     - https://www.tutorialspoint.com/python/python_multithreading.htm
 TODO:
-    - implement threading in circuitpython (if available)
+    - implement threading in circuitpython (if available)v
     - sleep and wake from ls spi connection to save power (probably not needed)
 """
 import sys
@@ -39,8 +39,8 @@ def sens_thread() -> None:
     except ValueError as val_err:
         print(f"{__name__}\t| ISSUE WITH SENSORS! {val_err}")
 
-def lora_thread() -> None:
-    """First Thread of the program, calls the "run" function of the LoRa Module.
+def sdcard_thread() -> None:
+    """First Thread of the program, calls the "run" function of the SD Card Module.
 
     This method is kept simple to reduce the complexity of the main and to make testing modular.
     The loop relies on a global variable to determine when the threads should be killed.
@@ -66,7 +66,10 @@ def main():
     reader = node.Sensor()
     card = node.Storage()
 
-    print(f"{__name__}\t| * Starting up device with %d Cores...")
+    # Name the csv output file for the current session. Comment out to use "local" for default
+    card.set_filename(reader.get_filename())
+
+    print(f"{__name__}\t| * Starting up device with {node.CORES} Cores...")
 
     try:
         # Setting up Threads based on core count
@@ -76,13 +79,13 @@ def main():
         elif node.CORES == 1:
             while True:
                 sens_thread()
-                lora_thread()
+                sdcard_thread()
 
         else:
             t1 = threading.Thread(target=sens_thread)
             t1.start()
             print(f"{__name__}\t|\tThreads Launched...\n")
-            lora_thread()       # This is a blocking function call until END is set True
+            sdcard_thread()       # This is a blocking function call until END is set True
 
             # Safely closing all threads
             t1.join()
