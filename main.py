@@ -9,7 +9,7 @@ Documentation Notes:
     - https://stackoverflow.com/questions/1523427/what-is-the-common-header-format-of-python-files
     - https://www.tutorialspoint.com/python/python_multithreading.htm
 TODO:
-    - implement threading in circuitpython (if available)v
+    - implement threading in circuitpython (if available)
     - sleep and wake from ls spi connection to save power (probably not needed)
 """
 import sys
