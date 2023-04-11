@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['collect_28',['collect',['../classnode_1_1sensor_1_1_reader.html#aa37521febc571a93e5cbd40de4a742bf',1,'node::sensor::Reader']]]
+  ['collect_27',['collect',['../classnode_1_1sensor_1_1_sensor.html#aec9385179c0bd14b8922928dd76a7881',1,'node::sensor::Sensor']]]
 ];

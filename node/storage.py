@@ -5,63 +5,99 @@ Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
 LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1_lo_ra.html
 """
-# from .gpio import lora_tx
-# from .constants import MPY
 import os
-import busio
+
+# Circuitpython imports
 import board
-import digitalio
+import busio
 import sdcardio
 import storage
 
-# Set up GPIO for SD Card
-spi = busio.SPI(board.GP18, board.GP19, board.GP16)
-cs = board.GP17
+# Module Constants
+from .constants import CARD
 
-# Create the SD object
-sd = sdcardio.SDCard(spi, cs)
+class Storage:
+    """ Class set  """
+    def __init__(self):
+        """ Initial setup for the SD Card
+        
+            This will create an SD Card object, format it, then mount it to the filesystem
+            Afterwards, the SD Card will be able to be accessed like a normal part of the filesystem
+        """
+        if CARD:
+            # Create the SD object
+            spi = busio.SPI(board.GP18, board.GP19, board.GP16)
+            cs = board.GP17
+            baud = 8000000
+            sd = sdcardio.SDCard(spi, cs, baud)
 
-# Format the storage
-vfs = storage.VfsFat(sd)
+            # Format the storage
+            vfs = storage.VfsFat(sd)
 
-# Mount the drive and call id /sd
-storage.mount(vfs, '/sd')
+            # Mount the drive and call id /sd
+            storage.mount(vfs, '/sd')
+        else:
+            if not os.path.exists("/sd/"):
+                os.mkdir("/sd/")
 
-# list all files in the drive
-os.listdir('/sd')
+        # list all files in the drive
+        os.listdir('/sd')
+        # Default name to save all data to
+        self.filename = "local"
 
-def send(packet: str) -> None:
-    """ Processes Main LoRa communications with packet transfer
+    def set_filename(self, filename):
+        """ Setter function for the csv filename
+
+        Args:
+            filename (str) - formatted name to identify the data from the current session
+        Returns:
+            None
+        """
+        self.filename = filename
+
+    def generate_csv(self) -> None:
+        """ Sets up the headers on a CSV file
+
+            This is called automatically during initialization for the "local.csv" file
+            However, if additional files are desired then this function can be called again with
+            a different value for the "filename" parameter
+
+            Args:
+                filename (str): [default="local"] Filename to initalize (exclude file suffix)
+            Returns:
+                None
+        """
+        # Generate the inital Header row
+        headers = "Timestamp,GPS_Latitude,GPS_Longitude,Lightning Distance,Lightning Intensity"
+
+        # Open the file on the sd card to save the lightning data and sent to append "a"
+        file = open(f"/sd/{self.filename}.csv", "a")
+        file.write(headers+"\n") # need an escape character for csv
+        file.close()
 
 
+    def save(self, packet: str) -> None:
+        """ Saves a new packet to an existing CSV file
 
-    Args:
-        packet (str): The compiled string that will be sent over LoRa
-    Returns:
-        None
+        If the file has not yet been created, then it should call a function to generate a file
+        with the appropriate headers.
 
-    TODO: Should the return type be none, or should it wait for confirmation?
-    """
-    # Debug packet
-    # if "PACK:" in packet:
-    # logging.info("\t%s\t|\tpacket=%s\n", __name__, packet)
-    # else:
+        Args:
+            packet (str): The compiled string that will be sent over LoRa
+        Returns:
+            None
+        """
+        # Generate the full path to the output csv
+        filepath = f"/sd/{self.filename}.csv"
 
-    # Send Packet
-    # lora_tx(packet)
+        # If the given filename has not been used before, then generate a new one with headers
+        if not os.path.exists(filepath):
+            self.generate_csv()
 
-    print(f"{__name__}\t|\tDELIVERED={packet}")
-    # Append as needed
-    # Open the file on the sd card to save the lightning data and sent to append "a"
-    file = open("/sd/lightning.csv", "a")
+        # Open the file on the sd card to save the lightning data and sent to append "a"
+        file = open(filepath, "a")
+        file.write(packet+"\n") # need an escape character for csv
+        file.close()
 
-    # write the "packet" to the file
-    file.write(packet+"\n") # need an escape character for csv
-
-    # close the file
-    file.close()
-
-    # else:
-        # logging.error("\t%s\t|\tResponse was different...", __name__)
-
-# TimeStamp,Distance,gps lat, gps long
+        # Print Packet for debugging
+        print(f"{__name__}\t| DELIVERED={packet}")

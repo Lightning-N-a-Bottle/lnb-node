@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['b1_34',['B1',['../classnode_1_1gpio_1_1_devices.html#a0fe9d5bd566a0c0e3ed5bb0512cfd6e8',1,'node::gpio::Devices']]]
+  ['clock_36',['clock',['../classnode_1_1sensor_1_1_sensor.html#a285557b976d247d361c4eb4ab3c779bd',1,'node::sensor::Sensor']]]
 ];

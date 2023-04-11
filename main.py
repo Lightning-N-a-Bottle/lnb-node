@@ -9,15 +9,13 @@ Documentation Notes:
     - https://stackoverflow.com/questions/1523427/what-is-the-common-header-format-of-python-files
     - https://www.tutorialspoint.com/python/python_multithreading.htm
 TODO:
-    - look into machine package - https://docs.micropython.org/en/latest/library/machine.html
-    - sleep and wake from ls spi connection to save power
-    - 
+    - implement threading in circuitpython (if available)
+    - sleep and wake from ls spi connection to save power (probably not needed)
 """
 import sys
 
 import node
 
-END = False         # Global Variable that kills threads
 PACKET_QUEUE = []   # Sensor thread indicates when a package is ready
 
 def sens_thread() -> None:
@@ -41,8 +39,8 @@ def sens_thread() -> None:
     except ValueError as val_err:
         print(f"{__name__}\t| ISSUE WITH SENSORS! {val_err}")
 
-def lora_thread() -> None:
-    """First Thread of the program, calls the "run" function of the LoRa Module.
+def sdcard_thread() -> None:
+    """First Thread of the program, calls the "run" function of the SD Card Module.
 
     This method is kept simple to reduce the complexity of the main and to make testing modular.
     The loop relies on a global variable to determine when the threads should be killed.
@@ -54,7 +52,7 @@ def lora_thread() -> None:
         None
     """
     if len(PACKET_QUEUE) > 0:
-        node.send(PACKET_QUEUE.pop(0))
+        card.save(PACKET_QUEUE.pop(0))
 
 def main():
     """
@@ -64,11 +62,14 @@ def main():
     """
     # System Settings
     print(f"{__name__}\t|\t* GPIO ENABLED...")
-    global devices, reader
-    devices = node.Devices()
-    reader = node.Reader(devices=devices, name="Node_A")
+    global reader, card
+    reader = node.Sensor()
+    card = node.Storage()
 
-    print(f"{__name__}\t| * Starting up device with %d Cores...")
+    # Name the csv output file for the current session. Comment out to use "local" for default
+    card.set_filename(reader.get_filename())
+
+    print(f"{__name__}\t| * Starting up device with {node.CORES} Cores...")
 
     try:
         # Setting up Threads based on core count
@@ -78,19 +79,18 @@ def main():
         elif node.CORES == 1:
             while True:
                 sens_thread()
-                lora_thread()
+                sdcard_thread()
 
         else:
-            t1 = threading.Thread(target=sens_thread)
-            t1.start()
+            # t1 = threading.Thread(target=sens_thread)
+            # t1.start()
             print(f"{__name__}\t|\tThreads Launched...\n")
-            lora_thread()       # This is a blocking function call until END is set True
+            # sdcard_thread()       # This is a blocking function call until END is set True
 
             # Safely closing all threads
-            t1.join()
+            # t1.join()
 
         # System Settings
-        node.gpio.cleanup()
         print(f"{__name__}\t|\tAll Threads finished...exiting")
 
     except ValueError as val_err:       # TODO: Handle other error types better

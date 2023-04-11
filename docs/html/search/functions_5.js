@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['rtc_45',['rtc',['../namespacenode_1_1gpio.html#adfd39e334c29021dde728248e26458e3',1,'node::gpio']]]
+  ['timestamp_34',['timestamp',['../classnode_1_1sensor_1_1_sensor.html#aaef1dbb0f3558d2fba97e3c79d124748',1,'node::sensor::Sensor']]]
 ];
