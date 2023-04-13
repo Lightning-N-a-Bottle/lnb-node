@@ -1,9 +1,9 @@
-""" LoRa.py
-LoRa Thread Main
+""" storage.py
+Storage Thread Main
 
 Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
-LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1_lo_ra.html
+Storage Class Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/classnode_1_1storage_1_1_storage.html
 """
 import os
 
@@ -15,6 +15,7 @@ import storage
 
 # Module Constants
 from .constants import CARD
+
 
 class Storage:
     """ Class set  """
@@ -48,19 +49,23 @@ class Storage:
     def set_filename(self, filename):
         """ Setter function for the csv filename
 
+        Additionally, it will initialize the csv file for the output data.
+
         Args:
             filename (str) - formatted name to identify the data from the current session
         Returns:
             None
         """
         self.filename = filename
+        self.generate_csv()
 
     def generate_csv(self) -> None:
         """ Sets up the headers on a CSV file
 
-            This is called automatically during initialization for the "local.csv" file
-            However, if additional files are desired then this function can be called again with
-            a different value for the "filename" parameter
+            This should always being called during initialization for a csv output file.
+            If the filename is changed, then this should be called automatically to prepare it.
+            If this function is called more than once on one file, then it will make it harder to
+            read the data and clone the header row.
 
             Args:
                 filename (str): [default="local"] Filename to initalize (exclude file suffix)

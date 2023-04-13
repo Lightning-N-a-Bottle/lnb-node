@@ -8,7 +8,7 @@ The process for setting up the code and flashing it to the device is listed belo
 
 1. Clone Git Repo on local device
 2. Switch to desired branch
-2. Run `pip install -r requirements.txt`
+3. Run `pip install -r requirements.txt`
 4. Move the code to the RPi Pico if not there already
 
 ## Functions
@@ -52,7 +52,6 @@ The process for setting up the code and flashing it to the device is listed belo
 ### Documentation
 
 The source code comments aim to follow PEP8 and Doxygen requirements, and an html webpage has been generated using doxygen* for documentation purposes.
-
 To recompile the Doxygen html generation, simply run `"doxygen lnb-node"` from the project directory
 
 *NOTE: the files generated from doxygen are too large to be transferred onto the pico storage. We will have a separage branch that excludes the doxygen files so that the program can be directly cloned onto the pico
