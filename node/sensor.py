@@ -19,6 +19,7 @@ import rtc
 # Module Constants
 from .constants import GPS, LS, NOISE_FLOOR, SPIKE_REJECT, WATCHDOG_THRESH
 
+
 class Sensor:
     """ Reads the sensors """
     def __init__(self) -> None:
@@ -27,7 +28,7 @@ class Sensor:
         RTC needs to be initialized and updated
         GPS only needs to be on until it acquires a fix, then it can be disabled to save power
         and reduce noise.
-        The lightning sensor needs to be initialized, calibrated, and 
+        The lightning sensor needs to be initialized, calibrated, and configured for interrupts
 
         Args:
             None
@@ -92,7 +93,7 @@ class Sensor:
 
     def get_filename(self) -> str:
         """ Getter function for the csv filename
-        
+
         Args:
             None
         Returns:
@@ -166,7 +167,7 @@ class Sensor:
 
         return gps_lat, gps_long
 
-    def timestamp(self) -> int:
+    def timestamp(self) -> float:
         """ Acquire current time from Real Time Clock Module.
 
         This uses the internal Pico RTC module, but alternatively it can be used with an external
@@ -174,15 +175,22 @@ class Sensor:
         The value stored in this RTC is initialized from the GPS Fix, however if the GPS is
         disabled or disconnected, it will use a default value instead.
 
+        NOTE: If we choose to use a different timestamp value there are 3 other options already available:
+            - time_int = an integer that represents the amount of time that has passed since Jan 1st, 1970
+            - timestruc* = a struct/tuple that contains 9 elements with information about the current time
+                *(see https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.struct_time for more info)
+            - timestring = a formatted string that shows a more human-readable version of the time, but not csv/code friendly
+
         Args:
             None
         Returns:
-            time (str): current time
-        TODO: Reformat the timestamp into an easily readable string
+            time_int (int): amount of seconds that have passed since Jan 1, 1970
         """
-        # timestring = self.clock.datetime
-        timestring = time.monotonic()
-        return timestring
+        time_int: float = time.time()
+        timestruc: time.struct_time = time.localtime(time_int)
+        timestring: str = f"{timestruc.tm_year}-{timestruc.tm_mon}-{timestruc.tm_yday}_{timestruc.tm_hour}:{timestruc.tm_min}:{timestruc.tm_sec}"
+        print(f"{__name__}\t| Current time: {timestring}")
+        return time_int
 
     def lightning(self) -> str:
         """ Interacts with the Lightning Sensor Module
@@ -258,7 +266,7 @@ class Sensor:
         # When lightning is detected, this will populate the string with the sensor data
         stk: str = self.lightning()     # Acquire Lightning Distance/Intensity
         # Acquire RTC Timestamp, this has to come after the lightning strike
-        tstmp: str = self.timestamp()   # Acquire the formatted timestruct
+        tstmp: float = self.timestamp()   # Acquire the formatted timestruct
 
         # Append to PACKET_QUEUE
         packet: str = f"{tstmp},{self.gps_lat},{self.gps_long},{stk}"
