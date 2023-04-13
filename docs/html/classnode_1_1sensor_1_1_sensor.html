@@ -85,8 +85,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7acb2aa981b571542a0737ea35402f65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e47a020d3be4285a27da8619c239efc"><td class="memItemLeft" align="right" valign="top">&quot;tuple[float, float]&quot;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a4e47a020d3be4285a27da8619c239efc">get_GPS_Fix</a> (self)</td></tr>
 <tr class="separator:a4e47a020d3be4285a27da8619c239efc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaef1dbb0f3558d2fba97e3c79d124748"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#aaef1dbb0f3558d2fba97e3c79d124748">timestamp</a> (self)</td></tr>
-<tr class="separator:aaef1dbb0f3558d2fba97e3c79d124748"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8281022e55fef160f4f2b33e2c20c927"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a8281022e55fef160f4f2b33e2c20c927">timestamp</a> (self)</td></tr>
+<tr class="separator:a8281022e55fef160f4f2b33e2c20c927"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ad24506ff05f62856f3a60e9e7c58de"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a4ad24506ff05f62856f3a60e9e7c58de">lightning</a> (self)</td></tr>
 <tr class="separator:a4ad24506ff05f62856f3a60e9e7c58de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aec9385179c0bd14b8922928dd76a7881"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#aec9385179c0bd14b8922928dd76a7881">collect</a> (self)</td></tr>
@@ -139,7 +139,7 @@ Public Attributes</h2></td></tr>
 RTC needs to be initialized and updated
 GPS only needs to be on until it acquires a fix, then it can be disabled to save power
 and reduce noise.
-The lightning sensor needs to be initialized, calibrated, and 
+The lightning sensor needs to be initialized, calibrated, and configured for interrupts
 
 Args:
     None
@@ -260,14 +260,14 @@ GPIO Pins Involved:
 - MOSI: Data from microcontroller to AS3935</pre> 
 </div>
 </div>
-<a id="aaef1dbb0f3558d2fba97e3c79d124748"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaef1dbb0f3558d2fba97e3c79d124748">&#9670;&nbsp;</a></span>timestamp()</h2>
+<a id="a8281022e55fef160f4f2b33e2c20c927"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8281022e55fef160f4f2b33e2c20c927">&#9670;&nbsp;</a></span>timestamp()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> int node.sensor.Sensor.timestamp </td>
+          <td class="memname"> float node.sensor.Sensor.timestamp </td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
@@ -282,11 +282,16 @@ module if the given microcontroller doesn't have an internal RTC.
 The value stored in this RTC is initialized from the GPS Fix, however if the GPS is
 disabled or disconnected, it will use a default value instead.
 
+NOTE: If we choose to use a different timestamp value there are 3 other options already available:
+    - time_int = an integer that represents the amount of time that has passed since Jan 1st, 1970
+    - timestruc* = a struct/tuple that contains 9 elements with information about the current time
+        *(see https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.struct_time for more info)
+    - timestring = a formatted string that shows a more human-readable version of the time, but not csv/code friendly
+
 Args:
     None
 Returns:
-    time (str): current time
-TODO: Reformat the timestamp into an easily readable string
+    time_int (int): amount of seconds that have passed since Jan 1, 1970
 </pre> 
 </div>
 </div>
