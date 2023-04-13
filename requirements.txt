@@ -1,0 +1,11 @@
+# pip install -r requirements.txt
+# General
+adafruit-blinka
+
+# LoRa Module
+adafruit-circuitpython-ssd1306
+adafruit-circuitpython-framebuf
+adafruit-circuitpython-rfm9x
+
+# Lightning Sensor
+sparkfun-circuitpython-qwiicas3935

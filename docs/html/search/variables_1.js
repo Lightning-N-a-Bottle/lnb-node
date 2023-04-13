@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tx_13',['TX',['../namespacesrc_1_1sensor.html#ab4eadfdd4366e04edad7a1995683277d',1,'src::sensor']]]
+  ['clock_36',['clock',['../classnode_1_1sensor_1_1_sensor.html#a285557b976d247d361c4eb4ab3c779bd',1,'node::sensor::Sensor']]]
 ];
