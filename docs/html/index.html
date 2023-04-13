@@ -74,68 +74,63 @@ Setup Process</h1>
 <p>The process for setting up the code and flashing it to the device is listed below. Eventually I plan on scripting this process with a bash file so that it is automated.</p>
 <ol type="1">
 <li>Clone Git Repo on local device</li>
-<li>Download and install conda, if not already done<ol type="a">
-<li>Windows: <a href="https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Windows-x86_64.exe">https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Windows-x86_64.exe</a></li>
-<li>Linux/Raspbian: <a href="https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-aarch64.sh">https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-aarch64.sh</a><ol type="i">
-<li>Navigate to the conda directory (<code>"C:\Users\{Current_User}\miniconda3\Scripts"</code> on Windows)</li>
-<li>Run <code>./conda init --verbose</code></li>
-<li>Restart all terminals (if vscode, restart the whole IDE)</li>
+<li>Switch to desired branch</li>
 </ol>
-</li>
-</ol>
-</li>
-<li>Create a conda environment from the yml file</li>
-<li>Flash the desired branch to the RPi (Pico/Zero) module</li>
+<ol type="1">
+<li>Run <code>pip install -r requirements.txt</code></li>
+<li>Move the code to the RPi Pico if not there already</li>
 </ol>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Functions</h1>
 <ol type="1">
 <li>Record data from storms<ol type="a">
-<li>RTC Time</li>
-<li>GPS Location</li>
-<li>Strike Distance</li>
-<li>Intensity?</li>
+<li>Internal RTC Time of strike</li>
+<li>GPS Location of node</li>
+<li>Distance of Strike from Node</li>
+<li>Energy value recorded from AS3935 (Not necessarily useful, but included)</li>
+<li>Whether it is a disturber or a strike</li>
 </ol>
 </li>
-<li>Transmit data packets to Server through LoRa</li>
-<li>[Optional] Receive packets from other Nodes (mesh)</li>
 </ol>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Software Flowchart</h1>
-<ol type="1">
-<li>**_[TODO: This part is potentially run in multiple threads]_**</li>
-<li>**_[FIXME: If we are doing mesh, then we will need to account for both TX and RX_**</li>
-</ol>
 <h2><a class="anchor" id="autotoc_md4"></a>
-Thread 1</h2>
+Initial Setup</h2>
+<ol type="1">
+<li>Initialize GPS Module<ol type="a">
+<li>Wait until a fix is acquired</li>
+<li>Use NMEA data to initialize the internal RTC (GPS delivers up to 1 second accuracy)</li>
+<li>Use NMEA data to record the current GPS latitude and longitude</li>
+<li>Turn off the GPS</li>
+</ol>
+</li>
+<li>Initialize the AS3935 lightning sensor</li>
+<li>Initialize the Storage class object</li>
+<li>Run the Sensor.collect() function and append return to PACKET_QUEUE (or launch as a thread if multithreading)</li>
+<li>Run the Storage.save function with the PACKET_QUEUE as an input</li>
+</ol>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Sensor Class (Thread 1 if needed)</h2>
 <ol type="1">
 <li>A lightning strike is detected</li>
 <li>Read in the sensor data for distance</li>
 <li>Read in the exact RTC module time</li>
-<li>Read in the GPS Location **_[FIXME: should this be measured every time or should we store the location on the server during initial setup/handshake and assume it doesn't move?]_**</li>
-<li>Package this all up in some form of struct **_[TODO: Decide on best format. What can LoRa transmit best? JSON, CSV, dict, string, etc.]_**</li>
-<li>**_[FIXME: How do we indicate to the second thread that there is a packet ready to be sent? Ideas listed below]_**<ol type="a">
-<li>Set a flag that will be read by Thread 2 to indicate that there is at least one packet to be sent. The second thread can then be set on a schedule to send/clear out all packets every hour or so.</li>
-<li>If each package has it's own output file, the second thread could check the output directory for new files, send them immediately, and then delete them afterwards. Does the RPi Pico have a file structure?</li>
+<li>Package this all up in a comma separated string that includes the GPS measured initially</li>
+<li>Set a flag that will be read by Thread 2 to indicate that there is at least one packet to be sent.</li>
 </ol>
-</li>
-</ol>
-<h2><a class="anchor" id="autotoc_md5"></a>
-Thread 2</h2>
+<h2><a class="anchor" id="autotoc_md6"></a>
+Storage Class (Thread 2 if needed)</h2>
 <ol type="1">
-<li>This thread will be responsibly for LoRa control. It will either run on a schedule, or it will run whenever a new packet is detected from the first thread (see step 6 above).</li>
-<li>If we decide to use mesh, then this will also handle receiving from other Nodes that can't reach the Server on their own.</li>
-<li>Once this thread decides to send a packet, it should establish a connection with the server to ensure that it is listening<ol type="a">
-<li>**_[TODO: Figure out how to do this, whether it is through pinging or through pyLoRa features]_**</li>
-</ol>
-</li>
+<li>This thread will be responsibly for Micro SD control. It will automatically interface with the micro SD module whenever a new packet is detected from the first thread (see step 6 above).</li>
+<li>This will handle the GPIO connection to the sd module as well as the csv formatting and file structure.</li>
 <li>Send the packet across through whatever structure we decided on previously.</li>
 <li>We could add a handshake to confirm that the packet was sent properly, however this may be too complex, unnecessary, or slow.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="autotoc_md7"></a>
 Documentation</h2>
-<p>The source code comments aim to follow PEP8 and Doxygen requirements, and an html webpage has been generated using doxygen for documentation purposes.</p>
-<p>To recompile the Doxygen html generation, simply run <code>"doxygen lnb-node"</code> from the project directory </p>
+<p>The source code comments aim to follow PEP8 and Doxygen requirements, and an html webpage has been generated using doxygen* for documentation purposes.</p>
+<p>To recompile the Doxygen html generation, simply run <code>"doxygen lnb-node"</code> from the project directory</p>
+<p>*NOTE: the files generated from doxygen are too large to be transferred onto the pico storage. We will have a separage branch that excludes the doxygen files so that the program can be directly cloned onto the pico </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->

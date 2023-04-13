@@ -1,7 +1,7 @@
 {
-  "name": "demo-repo",
-  "version": "0.2.0",
-  "description": "A sample package.json",
+  "name": "lnb-node-repo-main",
+  "version": "1.0.0",
+  "description": "The main branch of the lnb-node code, includes documentation",
   "dependencies": {
     "@primer/css": "17.0.1"
   },
