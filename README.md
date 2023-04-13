@@ -7,52 +7,52 @@ The code that will go into the sensor nodes to record and transmit data
 The process for setting up the code and flashing it to the device is listed below. Eventually I plan on scripting this process with a bash file so that it is automated.
 
 1. Clone Git Repo on local device
-2. Download and install conda, if not already done
-    1. Windows: https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Windows-x86_64.exe
-    2. Linux/Raspbian: https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-aarch64.sh
-        1. Navigate to the conda directory (`"C:\Users\{Current_User}\miniconda3\Scripts"` on Windows)
-        2. Run `./conda init --verbose`
-        3. Restart all terminals (if vscode, restart the whole IDE)
-3. Create a conda environment from the yml file
-4. Flash the desired branch to the RPi (Pico/Zero) module
+2. Switch to desired branch
+2. Run `pip install -r requirements.txt`
+4. Move the code to the RPi Pico if not there already
 
 ## Functions
 
 1. Record data from storms
-   1. RTC Time
-   2. GPS Location
-   3. Strike Distance
-   4. Intensity?
-2. Transmit data packets to Server through LoRa
-3. [Optional] Receive packets from other Nodes (mesh)
+   1. Internal RTC Time of strike
+   2. GPS Location of node
+   3. Distance of Strike from Node
+   4. Energy value recorded from AS3935 (Not necessarily useful, but included)
+   5. Whether it is a disturber or a strike
 
 ## Software Flowchart
 
-1. **_[TODO: This part is potentially run in multiple threads]_**
-2. **_[FIXME: If we are doing mesh, then we will need to account for both TX and RX_**
+### Initial Setup
 
-### Thread 1
+1. Initialize GPS Module
+    1. Wait until a fix is acquired
+    2. Use NMEA data to initialize the internal RTC (GPS delivers up to 1 second accuracy)
+    3. Use NMEA data to record the current GPS latitude and longitude
+    4. Turn off the GPS
+2. Initialize the AS3935 lightning sensor
+3. Initialize the Storage class object
+4. Run the Sensor.collect() function and append return to PACKET_QUEUE (or launch as a thread if multithreading)
+5. Run the Storage.save function with the PACKET_QUEUE as an input
+
+### Sensor Class (Thread 1 if needed)
 
 1. A lightning strike is detected
 2. Read in the sensor data for distance
 3. Read in the exact RTC module time
-4. Read in the GPS Location **_[FIXME: should this be measured every time or should we store the location on the server during initial setup/handshake and assume it doesn't move?]_**
-5. Package this all up in some form of struct **_[TODO: Decide on best format. What can LoRa transmit best? JSON, CSV, dict, string, etc.]_**
-6. **_[FIXME: How do we indicate to the second thread that there is a packet ready to be sent? Ideas listed below]_**
-    1. Set a flag that will be read by Thread 2 to indicate that there is at least one packet to be sent. The second thread can then be set on a schedule to send/clear out all packets every hour or so.
-    2. If each package has it's own output file, the second thread could check the output directory for new files, send them immediately, and then delete them afterwards. Does the RPi Pico have a file structure?
+5. Package this all up in a comma separated string that includes the GPS measured initially
+6. Set a flag that will be read by Thread 2 to indicate that there is at least one packet to be sent.
 
-### Thread 2
+### Storage Class (Thread 2 if needed)
 
-1. This thread will be responsibly for LoRa control. It will either run on a schedule, or it will run whenever a new packet is detected from the first thread (see step 6 above).
-2. If we decide to use mesh, then this will also handle receiving from other Nodes that can't reach the Server on their own.
-3. Once this thread decides to send a packet, it should establish a connection with the server to ensure that it is listening
-    1. **_[TODO: Figure out how to do this, whether it is through pinging or through pyLoRa features]_**
+1. This thread will be responsibly for Micro SD control. It will automatically interface with the micro SD module whenever a new packet is detected from the first thread (see step 6 above).
+2. This will handle the GPIO connection to the sd module as well as the csv formatting and file structure.
 4. Send the packet across through whatever structure we decided on previously.
 5. We could add a handshake to confirm that the packet was sent properly, however this may be too complex, unnecessary, or slow.
 
 ### Documentation
 
-The source code comments aim to follow PEP8 and Doxygen requirements, and an html webpage has been generated using doxygen for documentation purposes.
+The source code comments aim to follow PEP8 and Doxygen requirements, and an html webpage has been generated using doxygen* for documentation purposes.
 
 To recompile the Doxygen html generation, simply run `"doxygen lnb-node"` from the project directory
+
+*NOTE: the files generated from doxygen are too large to be transferred onto the pico storage. We will have a separage branch that excludes the doxygen files so that the program can be directly cloned onto the pico
