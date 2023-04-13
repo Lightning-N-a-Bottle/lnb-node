@@ -1,7 +1,7 @@
 {
-  "name": "demo-repo",
-  "version": "0.2.0",
-  "description": "A sample package.json",
+  "name": "lnb-node-repo-pico",
+  "version": "1.0.0",
+  "description": "The branch of the lnb-node that is ready to be placed directly onto the pico",
   "dependencies": {
     "@primer/css": "17.0.1"
   },
