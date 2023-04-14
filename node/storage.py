@@ -95,10 +95,6 @@ class Storage:
         # Generate the full path to the output csv
         filepath = f"/sd/{self.filename}.csv"
 
-        # If the given filename has not been used before, then generate a new one with headers
-        if not os.path.exists(filepath):
-            self.generate_csv()
-
         # Open the file on the sd card to save the lightning data and sent to append "a"
         file = open(filepath, "a")
         file.write(packet+"\n") # need an escape character for csv
