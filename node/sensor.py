@@ -5,7 +5,7 @@ It will be responsible for the GPIO interface with sensor equipment
 
 Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
-LoRa Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1sensor.html
+Sensor Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1sensor.html
 """
 import sys
 import time
@@ -181,24 +181,44 @@ class Sensor:
                 *(see https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.struct_time for more info)
             - timestring = a formatted string that shows a more human-readable version of the time, but not csv/code friendly
 
+        TODO:
+            - https://stackoverflow.com/questions/41728843/adding-utc-time-axis-to-plot-with-local-time-in-time-format
+            - https://docs.circuitpython.org/projects/datetime/en/latest/api.html#adafruit_datetime.datetime.utcfromtimestamp
+            - UTC - YYYY-MM-DDThh:mm:ssZ
+                - sec = epoch % 60
+                - min = (epoch // 60) % 60
+                - hrs = (epoch // 3600) % 24
+                - day = epoch // 86400
+            - Epoch
+                - 1 hour = 3600 seconds
+                - 1 day = 86400 seconds
+                - 1 week = 604800 seconds
+                - 1 month = 2629743 seconds
+                - 1 year = 31556929 seconds
+
         Args:
             None
         Returns:
             time_int (int): amount of seconds that have passed since Jan 1, 1970
         """
+        # Acquires the utc formatted time
         time_int: float = time.time()
         timestruc: time.struct_time = time.localtime(time_int)
-        timestring: str = f"{timestruc.tm_year}-{timestruc.tm_mon}-{timestruc.tm_yday}_{timestruc.tm_hour}:{timestruc.tm_min}:{timestruc.tm_sec}"
-        print(f"{__name__}\t| Current time: {timestring}")
-        return time_int
+        timestring: str = f"{timestruc.tm_year}-{timestruc.tm_mon}-{timestruc.tm_yday}T{timestruc.tm_hour}:{timestruc.tm_min}:{timestruc.tm_sec}Z"
+        print(f"{__name__}\t| Current time: {timestring} or {time_int}")
 
-    def lightning(self) -> str:
+        return timestring
+
+    def lightning(self) -> float:
         """ Interacts with the Lightning Sensor Module
+
+        This function will be blocking until the AS3935 measures either a strike or a disturber
 
         Args:
             None
         Returns:
-            ls_out (str): a concatenated string with sensor data for the packet
+            distance (float): the distance measured by the lightning sensor, in kilometers
+                - [63 if disturber, -1 if disabled]
 
         GPIO Pins Involved:
         - CS ["Chip Select"]: Pull low to activate SPI reception
@@ -208,8 +228,7 @@ class Sensor:
         - MOSI: Data from microcontroller to AS3935
 
         """
-        distance = "disabled"
-        intensity = "disabled"
+        distance = -1
 
         try:
             i = 0
@@ -227,29 +246,32 @@ class Sensor:
                         if interrupt_value == self.as3935.NOISE:
                             print(f"{__name__}\t| DEBUG - Noise.")
                             self.as3935.clear_statistics()
+
                         elif interrupt_value == self.as3935.DISTURBER:
                             i += 1
+
                             print(f"{__name__}\t| INFO - Disturber {i} detected {distance}km away!")
                             self.as3935.clear_statistics()
                             # Comment out break to not save to csv
                             break
+
                         elif interrupt_value == self.as3935.LIGHTNING:
-                            print(f"{__name__}\t| INFO - Lightning strike detected {distance}km away!")
                             #Turn on PiLED
                             self.PiLED.value = 1
+
+                            print(f"{__name__}\t| INFO - Lightning strike detected {distance}km away!")
                             self.as3935.clear_statistics()
                             break
 
                     else:
                         break
+
                     time.sleep(0.5)
                     self.PiLED.value = 0
         except KeyboardInterrupt:
             pass
 
-        ls_out = f"{distance},{intensity}"
-
-        return ls_out
+        return distance
 
 
     def collect(self) -> str:
@@ -266,10 +288,12 @@ class Sensor:
         # When lightning is detected, this will populate the string with the sensor data
         stk: str = self.lightning()     # Acquire Lightning Distance/Intensity
         # Acquire RTC Timestamp, this has to come after the lightning strike
-        tstmp: float = self.timestamp()   # Acquire the formatted timestruct
+        t_stmp: str = self.timestamp()   # Acquire the UTC formatted timestruct
+        # Epoch time, used for graphing data
+        t_int: float = time.time()
 
         # Append to PACKET_QUEUE
-        packet: str = f"{tstmp},{self.gps_lat},{self.gps_long},{stk}"
+        packet: str = f"{t_stmp},{t_int},{self.gps_lat},{self.gps_long},{stk}"
         print(f"{__name__}\t| CREATED={packet}")
 
         return packet

@@ -73,7 +73,7 @@ class Storage:
                 None
         """
         # Generate the inital Header row
-        headers = "Timestamp,GPS_Latitude,GPS_Longitude,Lightning Distance,Lightning Intensity"
+        headers = "UTC_Time,Epoch_Time,GPS_Latitude,GPS_Longitude,Distance"
 
         # Open the file on the sd card to save the lightning data and sent to append "a"
         file = open(f"/sd/{self.filename}.csv", "a")
