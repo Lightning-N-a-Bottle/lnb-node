@@ -44,7 +44,7 @@ class Sensor:
         self.gps_lat, self.gps_long = self.get_GPS_Fix()
 
         # Generate the filename to append the values to (a new file is generated after each reboot)
-        self.filename = f"{self.timestamp()}_({self.gps_lat},{self.gps_long})"
+        self.filename = f"{time.time()}_({self.gps_lat},{self.gps_long})"
 
         # Turn off GPS Module after Fix or if disabled in constants.py
         self.GPS_ENABLE.value = 0
