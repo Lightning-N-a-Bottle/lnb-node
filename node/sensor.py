@@ -167,7 +167,7 @@ class Sensor:
 
         return gps_lat, gps_long
 
-    def timestamp(self) -> float:
+    def timestamp(self) -> str:
         """ Acquire current time from Real Time Clock Module.
 
         This uses the internal Pico RTC module, but alternatively it can be used with an external
@@ -179,22 +179,19 @@ class Sensor:
             - time_int = an integer that represents the amount of time that has passed since Jan 1st, 1970
             - timestruc* = a struct/tuple that contains 9 elements with information about the current time
                 *(see https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.struct_time for more info)
-            - timestring = a formatted string that shows a more human-readable version of the time, but not csv/code friendly
+            - timestring = a utc formatted string that shows a more human-readable version of the time
 
-        TODO:
-            - https://stackoverflow.com/questions/41728843/adding-utc-time-axis-to-plot-with-local-time-in-time-format
-            - https://docs.circuitpython.org/projects/datetime/en/latest/api.html#adafruit_datetime.datetime.utcfromtimestamp
-            - UTC - YYYY-MM-DDThh:mm:ssZ
-                - sec = epoch % 60
-                - min = (epoch // 60) % 60
-                - hrs = (epoch // 3600) % 24
-                - day = epoch // 86400
-            - Epoch
-                - 1 hour = 3600 seconds
-                - 1 day = 86400 seconds
-                - 1 week = 604800 seconds
-                - 1 month = 2629743 seconds
-                - 1 year = 31556929 seconds
+        UTC - YYYY-MM-DDThh:mm:ssZ
+            - sec = epoch % 60
+            - min = (epoch // 60) % 60
+            - hrs = (epoch // 3600) % 24
+            - day = epoch // 86400
+        Epoch
+            - 1 hour = 3600 seconds
+            - 1 day = 86400 seconds
+            - 1 week = 604800 seconds
+            - 1 month = 2629743 seconds
+            - 1 year = 31556929 seconds
 
         Args:
             None
@@ -286,7 +283,7 @@ class Sensor:
             packet (str): The properly formatted packet to be passed to LoRa
         """
         # When lightning is detected, this will populate the string with the sensor data
-        stk: str = self.lightning()     # Acquire Lightning Distance/Intensity
+        stk: float = self.lightning()     # Acquire Lightning Distance/Intensity
         # Acquire RTC Timestamp, this has to come after the lightning strike
         t_stmp: str = self.timestamp()   # Acquire the UTC formatted timestruct
         # Epoch time, used for graphing data
