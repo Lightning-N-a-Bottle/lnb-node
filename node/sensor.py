@@ -17,7 +17,7 @@ import digitalio
 import rtc
 
 # Module Constants
-from .constants import GPS, LS, NOISE_FLOOR, SPIKE_REJECT, WATCHDOG_THRESH
+from .constants import GPS, LS, NOISE_FLOOR, SPIKE_REJECT, WATCHDOG_THRESH, TUNE_CAP
 
 
 class Sensor:
@@ -83,10 +83,11 @@ class Sensor:
             else:
                 print(f"{__name__}\t| DEBUG - The Lightning Detector is in an Unknown mode.")
 
-            # Callibrate - If these parameters should be changed, then do so in py
+            # Callibrate - If these parameters should be changed, then do so in constants.py
             self.as3935.noise_level = NOISE_FLOOR
             self.as3935.watchdog_threshold = WATCHDOG_THRESH
             self.as3935.spike_rejection = SPIKE_REJECT
+            self.as3935.tune_cap = TUNE_CAP
         else:
             # Set up Interrupt pin on GPIO D21 with a pull-down resistor
             self.as3935_interrupt_pin = digitalio.DigitalInOut(board.GP8)
