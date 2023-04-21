@@ -34,3 +34,4 @@ RTC: bool = False       # Real Time Clock [True for external, False for internal
 NOISE_FLOOR: int = 5        # (1-7, default=2) Lower to detect smaller strikes, with more noise
 WATCHDOG_THRESH: int = 2    # (1-10, default=2) TODO:
 SPIKE_REJECT: int = 1       # (1-11, default=2) Modify the shape of spikes, round with lower range
+TUNE_CAP: int = 0           # (0-120, default=0) Modify the tune capacitor 
