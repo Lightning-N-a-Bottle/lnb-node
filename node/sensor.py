@@ -47,6 +47,8 @@ class Sensor:
         self.filename = f"{time.time()}_({self.gps_lat},{self.gps_long})"
 
         # Turn off GPS Module after Fix or if disabled in constants.py
+        # Sleep required to ensure the GPS value is saved.
+        time.sleep(.5)
         self.GPS_ENABLE.value = 0
 
         # Setup Lightning Sensor Module
