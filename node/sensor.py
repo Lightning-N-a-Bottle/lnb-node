@@ -204,7 +204,7 @@ class Sensor:
         # Acquires the utc formatted time
         time_int: float = time.time()
         timestruc: time.struct_time = time.localtime(time_int)
-        timestring: str = f"{timestruc.tm_year}-{timestruc.tm_mon}-{timestruc.tm_mday}T{timestruc.tm_hour}:{timestruc.tm_min}:{timestruc.tm_sec}Z"
+        timestring: str = f"{timestruc.tm_year:4}-{timestruc.tm_mon:2}-{timestruc.tm_mday:2}T{timestruc.tm_hour:2}:{timestruc.tm_min:2}:{timestruc.tm_sec:2}Z"
         print(f"{__name__}\t| Current time: {timestring} or {time_int}")
 
         return timestring
