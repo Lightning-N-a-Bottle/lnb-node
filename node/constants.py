@@ -6,6 +6,7 @@ Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.ht
 Constants Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/namespacenode_1_1constants.html
 """
 import os
+
 MPY: bool = False   # Running MicroPython
 CORES: int = 1      # System Core Count (For multithreading)
 RPI: bool = False   # Running on a Raspberry Pi
@@ -16,12 +17,15 @@ try:
     RPI = True
 except AttributeError:
     import platform
+
     ### IDENTIFY SYSTEM CORE COUNT ###
     # CORES = os.cpu_count()
-
     ### IDENTIFY SYSTEM OS/GPIO CAPABILITY ###
     if platform.system() == "Linux" and platform.release().find('raspi'):
         RPI = True
+
+### MODULE NAME (FOR FILE SORTING) ###
+NAME: str = "NODE-A"
 
 ### WHAT MODULES ARE CURRENTLY CONNECTED ###
 LS: bool = True         # Lightning Sensor

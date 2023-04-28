@@ -15,9 +15,11 @@ import board
 import busio
 import digitalio
 import rtc
+from adafruit_datetime import datetime
 
 # Module Constants
-from .constants import GPS, LS, NOISE_FLOOR, SPIKE_REJECT, WATCHDOG_THRESH, TUNE_CAP
+from .constants import (GPS, LS, NOISE_FLOOR, SPIKE_REJECT, TUNE_CAP,
+                        WATCHDOG_THRESH, NAME)
 
 
 class Sensor:
@@ -44,7 +46,7 @@ class Sensor:
         self.gps_lat, self.gps_long = self.get_GPS_Fix()
 
         # Generate the filename to append the values to (a new file is generated after each reboot)
-        self.filename = f"{time.time()}_({self.gps_lat},{self.gps_long})"
+        self.filename = f"{NAME}_{time.time()}_({self.gps_lat},{self.gps_long})"
 
         # Turn off GPS Module after Fix or if disabled in constants.py
         # Sleep required to ensure the GPS value is saved.
@@ -132,12 +134,19 @@ class Sensor:
             # Set update rate to once a second (1hz) which is what you typically want.
             gps_module.send_command(b"PMTK220,1000")
 
+            # Variable to test whether GPS has a timestamp
+            check_y = 2020
             # Wait until the GPS obtains a fix
-            while not gps_module.has_fix:
+            while not gps_module.has_fix or check_y == 2020:
                 print("Waiting for fix...")
-                gps_module.update()     # Refreshes "has_fix" value
+                gps_module.update()                         # Refreshes "has_fix" value
+                check_y = gps_module.timestamp_utc.tm_year   # Checks that time has been acquired
                 time.sleep(1)
             print(f"{__name__}\t| DEBUG - Got GPS Fix!")
+
+            # Store GPS location
+            gps_lat = gps_module.latitude
+            gps_long = gps_module.longitude
 
             # Set RTC using Fix timestamp
             self.clock.datetime = time.struct_time(
@@ -154,15 +163,6 @@ class Sensor:
                 )
             )
 
-            # Store GPS location
-            # gps.latitude_degrees, gps.latitude_minutes
-            # gps.longitude_degrees, gps.longitude_minutes
-            # gps.fix_quality
-            # gps.satellites
-            # gps.altitude_m
-            # gps.speed_knots
-            gps_lat = gps_module.latitude
-            gps_long = gps_module.longitude
 
         else:
             gps_lat: float = -1
@@ -178,11 +178,11 @@ class Sensor:
         The value stored in this RTC is initialized from the GPS Fix, however if the GPS is
         disabled or disconnected, it will use a default value instead.
 
-        NOTE: If we choose to use a different timestamp value there are 3 other options already available:
+        NOTE: If we choose to use a different timestamp value there are 2 options already available:
             - time_int = an integer that represents the amount of time that has passed since Jan 1st, 1970
-            - timestruc* = a struct/tuple that contains 9 elements with information about the current time
-                *(see https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.struct_time for more info)
-            - timestring = a utc formatted string that shows a more human-readable version of the time
+            - dt* = an object that contains all info about a date object and a time object, can be printed
+                *(see https://docs.circuitpython.org/projects/datetime/en/latest/index.html for more info)
+            - time_stamp = a utc formatted string that shows a more human-readable version of the time
 
         UTC - YYYY-MM-DDThh:mm:ssZ
             - sec = epoch % 60
@@ -200,14 +200,16 @@ class Sensor:
             None
         Returns:
             time_int (int): amount of seconds that have passed since Jan 1, 1970
+                or
+            time_stamp (str): utc time formatted in ISO8601 format
         """
         # Acquires the utc formatted time
-        time_int: float = time.time()
-        timestruc: time.struct_time = time.localtime(time_int)
-        timestring: str = f"{timestruc.tm_year:4}-{timestruc.tm_mon:2}-{timestruc.tm_mday:2}T{timestruc.tm_hour:2}:{timestruc.tm_min:2}:{timestruc.tm_sec:2}Z"
-        print(f"{__name__}\t| Current time: {timestring} or {time_int}")
+        dt: datetime = datetime.now()
+        time_stamp: str = dt.isoformat(sep="T")
 
-        return timestring
+        # time_int: int = time.time()       # DEPRICATED, but still kept for reference
+
+        return time_stamp
 
     def lightning(self) -> float:
         """ Interacts with the Lightning Sensor Module
