@@ -85,10 +85,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7acb2aa981b571542a0737ea35402f65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e47a020d3be4285a27da8619c239efc"><td class="memItemLeft" align="right" valign="top">&quot;tuple[float, float]&quot;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a4e47a020d3be4285a27da8619c239efc">get_GPS_Fix</a> (self)</td></tr>
 <tr class="separator:a4e47a020d3be4285a27da8619c239efc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8281022e55fef160f4f2b33e2c20c927"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a8281022e55fef160f4f2b33e2c20c927">timestamp</a> (self)</td></tr>
-<tr class="separator:a8281022e55fef160f4f2b33e2c20c927"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ad24506ff05f62856f3a60e9e7c58de"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a4ad24506ff05f62856f3a60e9e7c58de">lightning</a> (self)</td></tr>
-<tr class="separator:a4ad24506ff05f62856f3a60e9e7c58de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2297632c7c6c66a6af9538e23d6d4742"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#a2297632c7c6c66a6af9538e23d6d4742">timestamp</a> (self)</td></tr>
+<tr class="separator:a2297632c7c6c66a6af9538e23d6d4742"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae02ff503d4fe3cc63e7afb5160a87847"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#ae02ff503d4fe3cc63e7afb5160a87847">lightning</a> (self)</td></tr>
+<tr class="separator:ae02ff503d4fe3cc63e7afb5160a87847"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aec9385179c0bd14b8922928dd76a7881"><td class="memItemLeft" align="right" valign="top">str&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnode_1_1sensor_1_1_sensor.html#aec9385179c0bd14b8922928dd76a7881">collect</a> (self)</td></tr>
 <tr class="separator:aec9385179c0bd14b8922928dd76a7881"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -230,14 +230,14 @@ TODO: Potentially add a timeout for this feature? Is any data even viable withou
 </pre> 
 </div>
 </div>
-<a id="a4ad24506ff05f62856f3a60e9e7c58de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ad24506ff05f62856f3a60e9e7c58de">&#9670;&nbsp;</a></span>lightning()</h2>
+<a id="ae02ff503d4fe3cc63e7afb5160a87847"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae02ff503d4fe3cc63e7afb5160a87847">&#9670;&nbsp;</a></span>lightning()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> str node.sensor.Sensor.lightning </td>
+          <td class="memname"> float node.sensor.Sensor.lightning </td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
@@ -247,10 +247,13 @@ TODO: Potentially add a timeout for this feature? Is any data even viable withou
 </div><div class="memdoc">
 <pre class="fragment"> Interacts with the Lightning Sensor Module
 
+This function will be blocking until the AS3935 measures either a strike or a disturber
+
 Args:
     None
 Returns:
-    ls_out (str): a concatenated string with sensor data for the packet
+    distance (float): the distance measured by the lightning sensor, in kilometers
+        - [63 if disturber, -1 if disabled]
 
 GPIO Pins Involved:
 - CS ["Chip Select"]: Pull low to activate SPI reception
@@ -260,14 +263,14 @@ GPIO Pins Involved:
 - MOSI: Data from microcontroller to AS3935</pre> 
 </div>
 </div>
-<a id="a8281022e55fef160f4f2b33e2c20c927"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8281022e55fef160f4f2b33e2c20c927">&#9670;&nbsp;</a></span>timestamp()</h2>
+<a id="a2297632c7c6c66a6af9538e23d6d4742"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2297632c7c6c66a6af9538e23d6d4742">&#9670;&nbsp;</a></span>timestamp()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> float node.sensor.Sensor.timestamp </td>
+          <td class="memname"> str node.sensor.Sensor.timestamp </td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
@@ -282,16 +285,30 @@ module if the given microcontroller doesn't have an internal RTC.
 The value stored in this RTC is initialized from the GPS Fix, however if the GPS is
 disabled or disconnected, it will use a default value instead.
 
-NOTE: If we choose to use a different timestamp value there are 3 other options already available:
+NOTE: If we choose to use a different timestamp value there are 2 options already available:
     - time_int = an integer that represents the amount of time that has passed since Jan 1st, 1970
-    - timestruc* = a struct/tuple that contains 9 elements with information about the current time
-        *(see https://docs.circuitpython.org/en/latest/shared-bindings/time/index.html#time.struct_time for more info)
-    - timestring = a formatted string that shows a more human-readable version of the time, but not csv/code friendly
+    - dt* = an object that contains all info about a date object and a time object, can be printed
+        *(see https://docs.circuitpython.org/projects/datetime/en/latest/index.html for more info)
+    - time_stamp = a utc formatted string that shows a more human-readable version of the time
+
+UTC - YYYY-MM-DDThh:mm:ssZ
+    - sec = epoch % 60
+    - min = (epoch // 60) % 60
+    - hrs = (epoch // 3600) % 24
+    - day = epoch // 86400
+Epoch
+    - 1 hour = 3600 seconds
+    - 1 day = 86400 seconds
+    - 1 week = 604800 seconds
+    - 1 month = 2629743 seconds
+    - 1 year = 31556929 seconds
 
 Args:
     None
 Returns:
     time_int (int): amount of seconds that have passed since Jan 1, 1970
+        or
+    time_stamp (str): utc time formatted in ISO8601 format
 </pre> 
 </div>
 </div>

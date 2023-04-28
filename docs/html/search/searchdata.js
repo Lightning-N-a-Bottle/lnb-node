@@ -4,7 +4,7 @@ var indexSectionsWithContent =
   1: "s",
   2: "n",
   3: "_cglst",
-  4: "bcir",
+  4: "bcirs",
   5: "l"
 };
 

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lightning_31',['lightning',['../classnode_1_1sensor_1_1_sensor.html#a4ad24506ff05f62856f3a60e9e7c58de',1,'node::sensor::Sensor']]]
+  ['lightning_32',['lightning',['../classnode_1_1sensor_1_1_sensor.html#ae02ff503d4fe3cc63e7afb5160a87847',1,'node::sensor::Sensor']]]
 ];
