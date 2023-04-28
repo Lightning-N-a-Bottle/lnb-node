@@ -135,12 +135,12 @@ class Sensor:
             gps_module.send_command(b"PMTK220,1000")
 
             # Variable to test whether GPS has a timestamp
-            check_y = 2020
+            # check_y = 2020
             # Wait until the GPS obtains a fix
-            while not gps_module.has_fix or check_y == 2020:
+            while not gps_module.has_fix:       # or check_y == 2020:
                 print("Waiting for fix...")
                 gps_module.update()                         # Refreshes "has_fix" value
-                check_y = gps_module.timestamp_utc.tm_year   # Checks that time has been acquired
+                # check_y = gps_module.timestamp_utc.tm_year   # Checks that time has been acquired
                 time.sleep(1)
             print(f"{__name__}\t| DEBUG - Got GPS Fix!")
 
