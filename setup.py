@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # https://godatadriven.com/blog/a-practical-guide-to-using-setup-py/
+# TODO: This was unfinished, could be improved later
 
 from setuptools import find_packages, setup
 

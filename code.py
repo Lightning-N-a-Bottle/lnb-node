@@ -1,10 +1,11 @@
-""" code.py
-    This file is meant to help us organize our port to RPi Pico
-    The Raspberry Pi Pico should be able to port 
-    However, we need a more efficient way to integrate and test code while debugging
-    So, this file will simply choose which main file to run
+""" @file       code.py
+    @author     Sean Duffie
+    @brief      This file simply selects the desired main file to be run
+    @details    The Raspberry Pi Pico will always run the code.py file on startup, however -
+                because git doesn't handle renaming easily, we need a different way to swap mains
+                without renaming files.
 
-    To use this, import the main function from your chosen file and comment out the others
+                To use this, import the main function from your chosen file and comment out the others
 """
 from main import main
 # from lsens import main

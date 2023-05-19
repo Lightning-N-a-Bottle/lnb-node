@@ -1,7 +1,8 @@
-""" sensor.py
-Sensor Thread
-This file in the module will handle the packaging of sensor data
-It will be responsible for the GPIO interface with sensor equipment
+""" @file       sensor.py
+    @author     Sean Duffie
+    @brief      Acquires data from the sensors
+    @details    This file in the module will handle the packaging of sensor data
+                It will be responsible for the GPIO interface with sensor equipment
 
 Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html

@@ -1,5 +1,6 @@
-""" constants.py
-Stores all constant variables that are shared throughout the module
+""" @file       constants.py
+    @author     Sean Duffie
+    @brief      Stores all constant variables that are shared throughout the module
 
 Git Repo: https://github.com/Lightning-N-a-Bottle/lnb-node
 Main Doxygen: https://lightning-n-a-bottle.github.io/lnb-node/docs/html/index.html
